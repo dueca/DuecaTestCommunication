@@ -1,0 +1,16 @@
+;; -*-scheme-*-
+(Header "
+        original item   : TestMap.dco
+        made by         : René van Paassen
+        date            : 131225
+        description     : Testing map packing, unpacking and inspection")
+
+(IterableType std::map<std::string,int32_t> "#include <map>
+#include <string>
+#include <inttypes.h>")
+
+;; object that contains an stl map
+(Event TestMap
+       (Option hdf5)
+       ;; map with items
+       (std::map<std::string,int32_t> items))

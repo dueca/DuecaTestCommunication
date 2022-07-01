@@ -1,0 +1,13 @@
+entity = "PHLAB"
+
+[initial_set."an example"]
+datetime =  2022-03-04T19:00:00
+
+[[initial_set."an example".initial]]
+coding = "JSON"
+origin = "write-unified://PHLAB/1"
+data = '''
+[ { "identification": "unidentified",
+    "x": 0, "y": 0, "dx": 0, "dy": 0, "mode": "On" },
+  { "identification": "unidentified",
+    "x": 10, "y": 10, "dx": -1, "dy": -1, "mode": "On" } ]'''

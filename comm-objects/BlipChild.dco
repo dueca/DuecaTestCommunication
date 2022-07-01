@@ -1,0 +1,18 @@
+;; -*-scheme-*-
+(Header "
+        original item   : BlipChild.dco
+        made by         : René van Paassen
+        date            : 170520
+        description     : hdf5nest + inheritance")
+
+(Type uint32_t "#include <inttypes.h>")
+(Type MyBlip "#include \"MyBlip.hxx\"")
+
+;; test of inheritance in combination with hdf5 nested object & saving
+(Event BlipChild
+       (Inherits MyBlip)
+       (Option hdf5nest)
+       ;; dummy counter
+       (uint32_t count)
+       )
+

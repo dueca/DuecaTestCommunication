@@ -1,0 +1,16 @@
+;; -*-scheme-*-
+(Header "
+        item           : TestVarVector.dco
+        made by        : René van Paassen
+        date           : 131225
+        description    : Testing varvector")
+
+(IterableVarSizeType vvector "#include <varvector.hxx>
+#include <inttypes.h>
+typedef dueca::varvector<uint32_t> vvector;")
+
+;; Event, Stream, should not matter any more
+(Event TestVarVector
+       (Option hdf5)
+       ;; map with items
+       (vvector nums (DefaultSize 0)))

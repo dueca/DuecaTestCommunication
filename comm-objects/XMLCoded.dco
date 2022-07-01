@@ -1,0 +1,16 @@
+;; -*-scheme-*-
+(Header "
+        original item   : XMLCoded.dco
+        made by         : René van Paassen
+        date            : 210317
+        description     : xml coding test")
+
+(Type dueca::smartstring "#include <dueca/smartstring.hxx>")
+
+;; Object to carry XML data
+(Event XMLCoded
+       (Option hdf5)
+
+       ;; xml data
+       (dueca::smartstring document)
+       )

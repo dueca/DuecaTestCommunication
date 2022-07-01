@@ -1,0 +1,24 @@
+;; -*-scheme-*-
+(Header "
+        item            : BlipDrive.dco
+        made by         : Rene' van Paassen
+        date            : 220512
+        description     : Test object for DataRecorder use
+        copyright       : (c) 2022 TUDelft-AE-C&S
+")
+
+(Type double)
+(IterableType dueca::varvector<double>
+"#include <dueca/varvector.hxx>
+#include <extra/randNormal.hxx>")
+
+;; Record a vector with driving inputs to a MyBlip object
+(Object BlipDrive
+	(Option msgpack)
+	(IncludeFile BlipDriveExtra)
+	
+	;; input x direction
+	(double rx (Default 0.0))
+	;; input y direction
+	(double ry (Default 0.0))
+	)

@@ -1,0 +1,17 @@
+;; -*-scheme-*-
+(Header "
+        item           : TestFixVector.dco
+        made by        : René van Paassen
+        date           : 131225
+        description    : Testing map packing, unpacking and inspection,
+                         with nested data")
+
+(IterableType blipmap "#include <map>
+#include <stringoptions.h>
+#include \"MyBlip.hxx\"
+typedef std::map<string16,MyBlip> blipmap;")
+
+;; Event, Stream, should not matter any more
+(Event TestNestedMap
+       ;; map with items
+       (blipmap blips))

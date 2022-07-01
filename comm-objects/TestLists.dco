@@ -1,0 +1,21 @@
+;; -*-scheme-*-
+(Header "
+        original item   : TestLists.dco
+        made by         : René van Paassen
+        date            : 131225
+        description     : Testing list packing, unpacking and inspection")
+
+(IterableType std::list<std::string> "#include <list>
+#include <string>")
+(IterableType std::list<int32_t> "#include <list>
+#include <inttypes.h>")
+
+
+;; object that contains an stl map
+(Event TestLists
+       (Option hdf5)
+       ;; list with int
+       (std::list<int32_t> l_ints)
+       ;; list with string
+       (std::list<std::string> l_string)
+       )

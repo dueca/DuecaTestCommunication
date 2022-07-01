@@ -1,0 +1,17 @@
+;; -*-scheme-*-
+(Header "
+        item           : TestLimVector.dco
+        made by        : René van Paassen
+        date           : 131225
+        description    : Testing limvector")
+
+(IterableVarSizeType blipvector "#include <limvector.hxx>
+#include <stringoptions.h>
+#include \"MyBlip.hxx\"
+typedef dueca::limvector<4,MyBlip> blipvector;")
+
+;; Event, Stream, should not matter any more
+(Event TestLimVector
+       (Option hdf5)
+       ;; map with items
+       (blipvector blips (DefaultSize 0)))

@@ -1,0 +1,17 @@
+;; -*-scheme-*-
+(Header "
+        original item   : TestFixVector.dco
+        made by         : René van Paassen
+        date            : 131225
+        description     : Testing map packing, unpacking and inspection,
+                          with fixed vector")
+
+(IterableType fvector "#include <fixvector.hxx>
+#include <inttypes.h>
+typedef dueca::fixvector<4,uint32_t> fvector;")
+
+;; Object that contains a fixed-size vector
+(Event TestFixVector
+       (Option hdf5)
+       ;; map with items
+       (fvector nums))
