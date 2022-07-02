@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is a test project for DUECA, stressing channel writing and reading. It runs with [DUECA Middleware](https://github.com/dueca/dueca), do not clone directly but use DUECA's `dueca-project` script for that. 
+This is a test project for DUECA, stressing channel writing and reading. It runs with [DUECA Middleware](https://github.com/dueca/dueca), do not clone directly but use DUECA's `dueca-gproject` script for that. 
 
 ## Application
 
