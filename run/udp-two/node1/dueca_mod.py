@@ -66,6 +66,16 @@ if this_node_id == ecs_node:
     if no_of_nodes > 1:
          DUECA_mods.append(dueca.Module("net-view", "", admin_priority))
 
+    for e in ("PHLAB",):
+        DUECA_mods.append(
+            dueca.Module("initials-inventory", e, admin_priority).param(
+                # reference_file=f"initials-{e}.toml",
+                store_file=f"initials-{e}-%Y%m%d_%H%M.toml"))
+        DUECA_mods.append(
+            dueca.Module("replay-master", e, admin_priority).param(
+                # reference_files=f"recordings-{e}.ddff",
+                store_files=f"recordings-{e}-%Y%m%d_%H%M%S.ddff"))
+
     # create the entity with that list
     DUECA_entity = dueca.Entity("dueca", DUECA_mods)
 
@@ -97,7 +107,7 @@ if this_node_id == ecs_node:
                 place_blip = [ 2, 2 ]).param(
 
                 add_flasher_blip = "flashing 1",
-                place_flasher_blip = [ 13.0, 0.4, 4.0 ]))
+                place_flasher_blip = [ 200, 0.4, 4.0 ]))
 
     mymods.append(
         dueca.Module(
@@ -121,7 +131,7 @@ if this_node_id == 1:
                 place_blip = [ 2, 2 ]).param(
 
                 add_flasher_blip = "flashing 2",
-                place_flasher_blip = [ 13.0, 0.4, 4.0 ]))
+                place_flasher_blip = [ 220, 0.4, 4.0 ]))
 
     mymods.append(
         dueca.Module(
@@ -129,6 +139,9 @@ if this_node_id == 1:
                 set_timing = sim_timing,
                 check_timing = (10000, 20000)
             ))
+
+# enable replay/recording
+filer = dueca.ReplayFiler("PHLAB")
 
 # etc, each node can have modules in its mymods list
 
