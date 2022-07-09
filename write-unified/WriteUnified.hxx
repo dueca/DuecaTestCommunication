@@ -18,9 +18,9 @@
 #include "comm-objects.h"
 
 // include the dusime header
-#include <dusime.h>
-#include <CriticalActivity.hxx>
-
+#include <dusime/dusime.h>
+#include <dueca/CriticalActivity.hxx>
+#include <dueca/AssociateObject.hxx>
 
 // include headers for functions/classes you need in the module
 #include <list>
@@ -41,7 +41,8 @@ private: // simulation data
   // declare the data you need in your simulation
   double dt;
 
-  struct NormalBlipSpec
+  /** Helper for driving/writing a single channel */
+  struct NormalBlipSpec: public AssociateObject<WriteUnified>
   {
     /** initial location/name blip. */
     MyBlip b;
@@ -50,17 +51,19 @@ private: // simulation data
     bool evtype;
 
     /** Pointer to an access token. */
-    ChannelWriteToken* token;
+    ChannelWriteToken token;
 
     /** Data recorder for advance (random input)/Replay */
-    //DataRecorder drive_recorder;
+    DataRecorder drive_recorder;
 
     // constructor
-    NormalBlipSpec(const MyBlip& b, ChannelWriteToken* token,
-                   bool evtype = false) : b(b), evtype(evtype), token(token){}
+    NormalBlipSpec(const WriteUnified& host, const MyBlip& b,
+                   bool evtype = false);
 
     // access to the token.
-    inline ChannelWriteToken*& getToken() {return token;}
+    inline ChannelWriteToken& getToken() {return token;}
+
+    bool isValid();
 
     // access to the initial blip
     inline MyBlip& getBlip() {return b;}
@@ -69,8 +72,8 @@ private: // simulation data
     NormalBlipSpec(const NormalBlipSpec&);
   };
 
-
-  class FlasherBlipSpec
+  /** Helper for driving/writing a single, time limited channel */
+  class FlasherBlipSpec: public AssociateObject<WriteUnified>
   {
     /** initial location/name blip. */
     MyBlip b;
@@ -85,10 +88,14 @@ private: // simulation data
     /** Pointer to an access token. */
     ChannelWriteToken* token;
 
+    /** Invalid count, 0 = valid */
+    unsigned int icount;
+
   public:
     // constructor
-    FlasherBlipSpec(const MyBlip& b);
+    FlasherBlipSpec(const WriteUnified& host, const MyBlip& b);
 
+    // on-off behavior
     bool flash();
 
     // access to the token.
@@ -104,7 +111,7 @@ private: // simulation data
 private: // trim calculation data
   // declare the trim calculation data needed for your simulation
 
-private: // snapshot data
+private: // snapshot data, recording of state a a given moment
   dueca::smartstring            snapdata;
 
 private: // channel access

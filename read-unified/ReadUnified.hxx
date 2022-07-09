@@ -1,13 +1,13 @@
 /* ------------------------------------------------------------------   */
 /*      item            : ReadUnified.hxx
         made by         : repa
-	from template   : DusimeModuleTemplate.hxx
+        from template   : DusimeModuleTemplate.hxx
         template made by: Rene van Paassen
         date            : Fri Nov 12 14:59:04 2004
-	category        : header file 
-        description     : 
-	changes         : Fri Nov 12 14:59:04 2004 first version
-	template changes: 030401 RvP Added template creation comment
+        category        : header file
+        description     :
+        changes         : Fri Nov 12 14:59:04 2004 first version
+        template changes: 030401 RvP Added template creation comment
         language        : C++
 */
 
@@ -24,12 +24,13 @@ USING_DUECA_NS
 // include headers for functions/classes you need in the module
 
 
-/** A module.
-    
+/** Test module, reads all entries in a channel, by iterating through
+    these.
+
     The instructions to create an module of this class from the Scheme
     script are:
 
-    \verbinclude read-multi-stream.scm
+    \verbinclude read-unified.scm
 */
 class ReadUnified: public SimulationModule
 {
@@ -58,7 +59,7 @@ private: // activity allocation
 
   /** Regular clock activation. */
   PeriodicAlarm         myclock;
-  
+
 public: // class name and trim/parameter tables
   /** Name of the module. */
   static const char* const           classname;
@@ -68,7 +69,7 @@ public: // class name and trim/parameter tables
 
   /** Return the parameter table. */
   static const ParameterTable*       getMyParameterTable();
-  
+
 public: // construction and further specification
   /** Constructor. Is normally called from scheme/the creation script. */
   ReadUnified(Entity* e, const char* part, const PrioritySpec& ts);
@@ -85,9 +86,9 @@ public: // construction and further specification
   /** Destructor. */
   ~ReadUnified();
 
-  // add here the member functions you want to be called with further 
+  // add here the member functions you want to be called with further
   // parameters. These are then also added in the parameter table
-  // The most common one (addition of time spec) is given here. 
+  // The most common one (addition of time spec) is given here.
   // Delete if not needed!
 
   /** Specify a time specification for the simulation activity. */
@@ -102,7 +103,7 @@ public: // member functions for cooperation with DUECA
 
   /** start responsiveness to input data. */
   void startModule(const TimeSpec &time);
-  
+
   /** stop responsiveness to input data. */
   void stopModule(const TimeSpec &time);
 
@@ -114,17 +115,17 @@ public: // the member functions that are called for activities
   void tokenValid(const TimeSpec& ts);
 
 public: // member functions for cooperation with DUSIME
-  /** For the Snapshot capability, fill the snapshot "snap" with the 
+  /** For the Snapshot capability, fill the snapshot "snap" with the
       data saved at a point in your simulation (if from_trim is false)
       or with the state data calculated in the trim calculation (if
       from_trim is true). */
-  void fillSnapshot(const TimeSpec& ts, 
-		    Snapshot& snap, bool from_trim);
-  
+  void fillSnapshot(const TimeSpec& ts,
+                    Snapshot& snap, bool from_trim);
+
   /** Restoring the state of the simulation from a snapshot. */
   void loadSnapshot(const TimeSpec& t, const Snapshot& snap);
 
-  /** Perform a trim calculation. Should NOT use current state 
+  /** Perform a trim calculation. Should NOT use current state
       uses event channels parallel to the stream data channels,
       calculates, based on the event channel input, the steady state
       output. */
