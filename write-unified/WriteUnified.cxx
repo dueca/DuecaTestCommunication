@@ -111,11 +111,14 @@ const ParameterTable* WriteUnified::getMyParameterTable()
   return parameter_table;
 }
 
-WriteUnified::FlasherBlipSpec::FlasherBlipSpec(const MyBlip& b) :
+WriteUnified::FlasherBlipSpec::FlasherBlipSpec(const WriteUnified& host,
+                                               const MyBlip& b) :
+  AssociateObject<WriteUnified>(host),
   b(b),
   period(100),
   countdown(period),
-  token(NULL)
+  token(NULL),
+  icount(0)
 {
   //
 }
@@ -124,7 +127,34 @@ bool WriteUnified::FlasherBlipSpec::flash()
 {
   if (! (--countdown)) {
     countdown = period;
+    if (token == NULL) {
+      token = new ChannelWriteToken
+        (getId(), NameSet(getEntity(), "MyBlip", getPart()),
+         "MyBlip", "flash",
+         Channel::Continuous, Channel::OneOrMoreEntries);
+      ChannelEntryInfo ei = token->getChannelEntryInfo();
+      cout << "created new token, crid=" << ei.creation_id << endl;
+      icount = 1;
+    }
+    else {
+      cout << "deleting token" << endl;
+      delete token;
+      token = NULL;
+    }
     return true;
+  }
+
+  if (icount) {
+    bool res = token->isValid();
+    if (res) {
+      ChannelEntryInfo ei = token->getChannelEntryInfo();
+      cout << "flash token valid after " << icount << " checks, entry_id="
+           << ei.entry_id << endl;
+      icount = 0;
+    }
+    else {
+      icount++;
+    }
   }
   return false;
 }
@@ -235,12 +265,7 @@ bool WriteUnified::addBlip(const vstring& s)
   }
 
   MyBlip b; b.identification = s;
-  bliplist.emplace_back
-    (b,
-     new ChannelWriteToken
-     (getId(), NameSet(getEntity(), "MyBlip", getPart()),
-      "MyBlip", s, Channel::Continuous,
-      Channel::OneOrMoreEntries), false);
+  bliplist.emplace_back(*this, b, false);
   return true;
 }
 
@@ -252,11 +277,7 @@ bool WriteUnified::addEventBlip(const vstring& s)
   }
 
   MyBlip b; b.identification = s;
-  bliplist.emplace_back(b,
-                        new ChannelWriteToken
-                        (getId(), NameSet(getEntity(), "MyBlip", getPart()),
-                         "MyBlip", s, Channel::Events,
-                         Channel::OneOrMoreEntries), true);
+  bliplist.emplace_back(*this, b, true);
   return true;
 }
 
@@ -294,8 +315,7 @@ bool WriteUnified::addFlasherBlip(const vstring& s)
   }
 
   MyBlip b; b.identification = s;
-  flasherlist.push_back
-    (FlasherBlipSpec(b));
+  flasherlist.emplace_back(*this, b);
   return true;
 }
 
@@ -338,21 +358,8 @@ bool WriteUnified::isPrepared()
   // It helps to indicate what the problems are
   bool res = true;
   //  unsigned idx=0;
-  for (BlipList::iterator ii = bliplist.begin();
-       ii != bliplist.end(); ii++) {
-    if (!ii->token->isValid()) {
-      W_MOD(getId() << '/' << classname << " token not valid ");
-      res = false;
-    }
-    /* ii->drive_recorder.complete(getEntity(),
-                                getNameSet().name + std::string("blip#") +
-                                boost::lexical_cast<std::string>(idx),
-                                getclassname<BlipDrive>());
-    if (!ii->drive_recorder.isValid()) {
-      W_MOD("recorder for blip " << idx << " not yet valid");
-      res = false;
-      } 
-      idx++; */
+  for (auto& b: bliplist) {
+    res = res && b.isValid();
   }
 
   cout << "isPrepared " << res << endl;
@@ -462,7 +469,7 @@ void WriteUnified::doCalculation(const TimeSpec& ts)
     break;
     }
 
-  case SimulationState::Replay: 
+  case SimulationState::Replay:
   case SimulationState::Advance: {
 
     if (getCurrentState() == SimulationState::Advance) {
@@ -494,20 +501,7 @@ void WriteUnified::doCalculation(const TimeSpec& ts)
          ii != flasherlist.end(); ii++) {
 
       // delete or create tokens?
-      if (ii->flash()) {
-        if (ii->getToken() == NULL) {
-          cout << "creating new token" << endl;
-          ii->getToken() = new ChannelWriteToken
-            (getId(), NameSet(getEntity(), "MyBlip", getPart()),
-             "MyBlip", "flash",
-             Channel::Continuous, Channel::OneOrMoreEntries);
-        }
-        else {
-          cout << "deleting token" << endl;
-          delete ii->getToken();
-          ii->getToken() = NULL;
-        }
-      }
+      ii->flash();
 
       // and move the blip
       ii->getBlip().dx += randNormal() * dt;
@@ -528,10 +522,10 @@ void WriteUnified::doCalculation(const TimeSpec& ts)
   // write the data
   for (BlipList::iterator ii = bliplist.begin();
        ii != bliplist.end(); ii++) {
-    DataWriter<MyBlip> b(*(ii->token), ts);
+    DataWriter<MyBlip> b((ii->token), ts);
     b.data() = ii->b;
   }
-  
+
   for (FlasherList::iterator ii = flasherlist.begin();
        ii != flasherlist.end(); ii++) {
     if (ii->getToken() != NULL && ii->getToken()->isValid()) {
@@ -626,3 +620,37 @@ void WriteUnified::trimCalculation(const TimeSpec& ts, const TrimMode& mode)
 // will check in with the scheme-interpreting code, and enable the
 // creation of modules of this type
 static TypeCreator<WriteUnified> a(WriteUnified::getMyParameterTable());
+
+// helper methods
+
+WriteUnified::NormalBlipSpec::
+NormalBlipSpec(const WriteUnified& host, const MyBlip& b,
+               bool evtype) :
+  AssociateObject<WriteUnified>(host),
+  b(b),
+  evtype(evtype),
+  token(getId(), NameSet(getEntity(), getclassname<MyBlip>(), getPart()),
+        getclassname<MyBlip>(), b.identification.c_str(),
+        evtype ? Channel::Events : Channel::Continuous,
+        Channel::OneOrMoreEntries)
+{
+  //
+}
+
+bool WriteUnified::NormalBlipSpec::isValid()
+{
+  bool res = true;
+  CHECK_TOKEN(token);
+
+  if (res) {
+    drive_recorder.complete(getEntity(), token);
+  }
+  CHECK_RECORDER(drive_recorder);
+
+  return res;
+}
+
+// ensure classname is copied for AssociateObjects.
+template<>
+const char* const AssociateObject<WriteUnified>::classname =
+  WriteUnified::classname;
