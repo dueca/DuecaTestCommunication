@@ -140,6 +140,10 @@ bool WriteUnified::FlasherBlipSpec::flash()
       cout << "deleting token" << endl;
       delete token;
       token = NULL;
+      if (icount) {
+        cerr << "Token not yet valid when deleting" << endl;
+      }
+      icount = 0;
     }
     return true;
   }
