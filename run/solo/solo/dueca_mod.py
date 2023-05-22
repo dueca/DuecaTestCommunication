@@ -108,13 +108,42 @@ if this_node_id == ecs_node:
                 set_timing = sim_timing,
                 check_timing = (10000, 20000)
             ))
+
+    mymods.append(
+        dueca.Module(
+            "write-assorted", "", sim_priority).param(
+                set_timing = sim_timing,
+                check_timing = (10000, 20000)
+            )
+        )
+
     mymods.append(
         dueca.Module("hdf5-logger", "", log_priority).param(
             ('set_timing', log_timing),
             ('chunksize', 3000),
             ('log_entry', ("MyBlip://PHLAB/1",
                            "MyBlip", "second blip", "/entry/second")),
-            ('watch-channel', ("MyBlip://PHLAB/1", "/watched/myblip"))
+            ('watch-channel', ("MyBlip://PHLAB/1", "/watched/myblip")),
+            ('log-entry', ("BlipChild://PHLAB",
+                           "BlipChild", "/entry/child")),
+            ('log-entry', ("BlipDrive://PHLAB",
+                           "BlipDrive", "/entry/drive")),
+            ('log-entry', ("TestFixVector://PHLAB",
+                           "TestFixVector", "/entry/fixvector")),
+            ('log-entry', ("TestLimVector://PHLAB",
+                           "TestLimVector", "/entry/limvector")),
+            ('log-entry', ("TestVarVector://PHLAB",
+                           "TestVarVector", "/entry/varvector")),
+            ('log-entry', ("TestLists://PHLAB",
+                           "TestLists", "/entry/lists")),
+            ('log-entry', ("TestMap://PHLAB",
+                           "TestMap", "/entry/map")),
+            ('log-entry', ("TestNestedMap://PHLAB",
+                           "TestNestedMap", "/entry/nestedmap")),
+            ('log-entry', ("XMLCoded://PHLAB",
+                           "XMLCoded", "/entry/coded")),
+            ('log-entry', ("TestMappedFixVector://PHLAB",
+                           "TestMappedFixVector", "/entry/mappedfixvector")),
         ))
 
     filer = dueca.ReplayFiler("PHLAB")

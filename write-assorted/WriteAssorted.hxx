@@ -14,14 +14,14 @@
 #define WriteAssorted_hxx
 
 // include the dusime header
-#include <dueca.h>
+#include <dueca/dueca.h>
 USING_DUECA_NS;
 
 // This includes headers for the objects that are sent over the channels
 #include "comm-objects.h"
 
 // include headers for functions/classes you need in the module
-
+#include <vector>
 
 /** A simulation module.
 

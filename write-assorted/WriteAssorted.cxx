@@ -10,7 +10,6 @@
         copyright       : (c)
 */
 
-
 #define WriteAssorted_cxx
 
 // include the definition of the module class
@@ -29,124 +28,106 @@
 #include <debug.h>
 
 // class/module name
-const char* const WriteAssorted::classname = "write-assorted";
+const char *const WriteAssorted::classname = "write-assorted";
 
 // Parameters to be inserted
-const ParameterTable* WriteAssorted::getMyParameterTable()
-{
+const ParameterTable *WriteAssorted::getMyParameterTable() {
   static const ParameterTable parameter_table[] = {
-    { "set-timing",
-      new MemberCall<_ThisModule_,TimeSpec>
-        (&_ThisModule_::setTimeSpec), set_timing_description },
+      {"set-timing",
+       new MemberCall<_ThisModule_, TimeSpec>(&_ThisModule_::setTimeSpec),
+       set_timing_description},
 
-    { "check-timing",
-      new MemberCall<_ThisModule_,std::vector<int> >
-      (&_ThisModule_::checkTiming), check_timing_description },
+      {"check-timing",
+       new MemberCall<_ThisModule_, std::vector<int>>(
+           &_ThisModule_::checkTiming),
+       check_timing_description},
 
-    /* You can extend this table with labels and MemberCall or
-       VarProbe pointers to perform calls or insert values into your
-       class objects. Please also add a description (c-style string).
+      /* You can extend this table with labels and MemberCall or
+         VarProbe pointers to perform calls or insert values into your
+         class objects. Please also add a description (c-style string).
 
-       Note that for efficiency, set_timing_description and
-       check_timing_description are pointers to pre-defined strings,
-       you can simply enter the descriptive strings in the table. */
+         Note that for efficiency, set_timing_description and
+         check_timing_description are pointers to pre-defined strings,
+         you can simply enter the descriptive strings in the table. */
 
-    /* The table is closed off with NULL pointers for the variable
-       name and MemberCall/VarProbe object. The description is used to
-       give an overall description of the module. */
-    { NULL, NULL, "please give a description of this module"} };
+      /* The table is closed off with NULL pointers for the variable
+         name and MemberCall/VarProbe object. The description is used to
+         give an overall description of the module. */
+      {NULL, NULL, "please give a description of this module"}};
 
   return parameter_table;
 }
 
 // constructor
-WriteAssorted::WriteAssorted(Entity* e, const char* part, const
-                   PrioritySpec& ps) :
-  /* The following line initialises the SimulationModule base class.
-     You always pass the pointer to the entity, give the classname and the
-     part arguments. */
-  Module(e, classname, part),
+WriteAssorted::WriteAssorted(Entity *e, const char *part,
+                             const PrioritySpec &ps)
+    : Module(e, classname, part),
 
-  // initialize the data you need in your simulation or process
+      // initialize the data you need in your simulation or process
 
-  // initialize the channel access tokens, check the documentation for the
-  // various parameters. Some examples:
-  w_blipchild(getId(), NameSet(getEntity(),
-			       getclassname<BlipChild>(), part),
-	      getclassname<BlipChild>(),
-	      0, Channel::Events),
-  w_blipdrive(getId(), NameSet(getEntity(),
-			       getclassname<BlipDrive>(), part),
-	      getclassname<BlipDrive>(),
-	      0, Channel::Events),
+      // initialize the channel access tokens, check the documentation for the
+      // various parameters. Some examples:
+      w_blipchild(getId(),
+                  NameSet(getEntity(), getclassname<BlipChild>(), part),
+                  getclassname<BlipChild>(), "child", Channel::Events),
+      w_blipdrive(getId(),
+                  NameSet(getEntity(), getclassname<BlipDrive>(), part),
+                  getclassname<BlipDrive>(), "drive", Channel::Events),
 
-  w_testfixvector(getId(), NameSet(getEntity(),
-				   getclassname<TestFixVector>(), part),
-		  getclassname<TestFixVector>(),
-		  0, Channel::Events),
+      w_testfixvector(getId(),
+                      NameSet(getEntity(), getclassname<TestFixVector>(), part),
+                      getclassname<TestFixVector>(), "fix", Channel::Events),
 
-  w_testlimvector(getId(), NameSet(getEntity(),
-				   getclassname<TestLimVector>(), part),
-		  getclassname<TestLimVector>(),
-		  0, Channel::Events),
-  w_testvarvector(getId(), NameSet(getEntity(),
-				   getclassname<TestVarVector>(), part),
-		  getclassname<TestVarVector>(),
-		  0, Channel::Events),
-  w_testlists(getId(), NameSet(getEntity(),
-			       getclassname<TestLists>(), part),
-	      getclassname<TestLists>(),
-	      0, Channel::Events),
+      w_testlimvector(getId(),
+                      NameSet(getEntity(), getclassname<TestLimVector>(), part),
+                      getclassname<TestLimVector>(), "lim", Channel::Events),
+      w_testvarvector(getId(),
+                      NameSet(getEntity(), getclassname<TestVarVector>(), part),
+                      getclassname<TestVarVector>(), "var", Channel::Events),
+      w_testlists(getId(),
+                  NameSet(getEntity(), getclassname<TestLists>(), part),
+                  getclassname<TestLists>(), "lists", Channel::Events),
 
-  w_testmap(getId(), NameSet(getEntity(),
-			     getclassname<TestMap>(), part),
-	    getclassname<TestMap>(),
-	    0, Channel::Events),
+      w_testmap(getId(), NameSet(getEntity(), getclassname<TestMap>(), part),
+                getclassname<TestMap>(), "map", Channel::Events),
 
-  w_testnestedmap(getId(), NameSet(getEntity(),
-				   getclassname<TestNestedMap>(), part),
-		  getclassname<TestNestedMap>(),
-		  0, Channel::Events),
-  w_xmlcoded(getId(), NameSet(getEntity(),
-			      getclassname<XMLCoded>(), part),
-	     getclassname<XMLCoded>(),
-	     0, Channel::Events),
+      w_testnestedmap(getId(),
+                      NameSet(getEntity(), getclassname<TestNestedMap>(), part),
+                      getclassname<TestNestedMap>(), "nest", Channel::Events),
+      w_xmlcoded(getId(), NameSet(getEntity(), getclassname<XMLCoded>(), part),
+                 getclassname<XMLCoded>(), "xml", Channel::Events),
 
-  w_testmappedfixvector(getId(), NameSet(getEntity(),
-					 getclassname<TestMappedFixVector>(),
-					 part),
-			getclassname<TestMappedFixVector>(),
-			0, Channel::Events),
+      w_testmappedfixvector(
+          getId(),
+          NameSet(getEntity(), getclassname<TestMappedFixVector>(), part),
+          getclassname<TestMappedFixVector>(), "mapvec", Channel::Events),
 
-  myclock(),
+      myclock(),
 
-  // a callback object, pointing to the main calculation function
-  cb1(this, &_ThisModule_::doCalculation),
-  // the module's main activity
-  do_calc(getId(), "write all kinds of dco data", &cb1, ps)
-{
+      // a callback object, pointing to the main calculation function
+      cb1(this, &_ThisModule_::doCalculation),
+      // the module's main activity
+      do_calc(getId(), "write all kinds of dco data", &cb1, ps) {
   // connect the triggers for simulation
   do_calc.setTrigger(myclock);
 }
 
-bool WriteAssorted::complete()
-{
+bool WriteAssorted::complete() {
   /* All your parameters have been set. You may do extended
      initialisation here. Return false if something is wrong. */
   return true;
 }
 
 // destructor
-WriteAssorted::~WriteAssorted()
-{
+WriteAssorted::~WriteAssorted() {
   //
 }
 
 // as an example, the setTimeSpec function
-bool WriteAssorted::setTimeSpec(const TimeSpec& ts)
-{
+bool WriteAssorted::setTimeSpec(const TimeSpec &ts) {
   // a time span of 0 is not acceptable
-  if (ts.getValiditySpan() == 0) return false;
+  if (ts.getValiditySpan() == 0)
+    return false;
 
   // specify the timespec to the activity
   // do_calc.setTimeSpec(ts);
@@ -162,23 +143,19 @@ bool WriteAssorted::setTimeSpec(const TimeSpec& ts)
 
 // the checkTiming function installs a check on the activity/activities
 // of the module
-bool WriteAssorted::checkTiming(const std::vector<int>& i)
-{
+bool WriteAssorted::checkTiming(const std::vector<int> &i) {
   if (i.size() == 3) {
     new TimingCheck(do_calc, i[0], i[1], i[2]);
-  }
-  else if (i.size() == 2) {
+  } else if (i.size() == 2) {
     new TimingCheck(do_calc, i[0], i[1]);
-  }
-  else {
+  } else {
     return false;
   }
   return true;
 }
 
 // tell DUECA you are prepared
-bool WriteAssorted::isPrepared()
-{
+bool WriteAssorted::isPrepared() {
   bool res = true;
 
   // check tokens:
@@ -198,22 +175,19 @@ bool WriteAssorted::isPrepared()
 }
 
 // start the module
-void WriteAssorted::startModule(const TimeSpec &time)
-{
+void WriteAssorted::startModule(const TimeSpec &time) {
   do_calc.switchOn(time);
 }
 
 // stop the module
-void WriteAssorted::stopModule(const TimeSpec &time)
-{
+void WriteAssorted::stopModule(const TimeSpec &time) {
   do_calc.switchOff(time);
 }
 
 // this routine contains the main simulation process of your module. You
 // should read the input channels here, and calculate and write the
 // appropriate output
-void WriteAssorted::doCalculation(const TimeSpec& ts)
-{
+void WriteAssorted::doCalculation(const TimeSpec &ts) {
   count++;
   {
     DataWriter<BlipChild> w(w_blipchild, ts);
@@ -244,26 +218,23 @@ void WriteAssorted::doCalculation(const TimeSpec& ts)
     w.data().items["one"] = 1;
     w.data().items["count"] = count;
   }
-{
+  {
     DataWriter<TestNestedMap> w(w_testnestedmap, ts);
     w.data().blips["first"] = MyBlip();
- }
- {
-   DataWriter<XMLCoded> w(w_xmlcoded, ts);
-   if (count % 2 == 0) {
-     w.data().document.encodexml(MyBlip());
-   }
-   else {
-     w.data().document.encodejson(MyBlip());
-   }
- }
- {
-   DataWriter<TestMappedFixVector> w(w_testmappedfixvector, ts);
-   w.data().mfv["0"] = { 0.0, double(count) };
-   w.data().mfv["1"] = { 1.0, double(count) };
-
- }
-
+  }
+  {
+    DataWriter<XMLCoded> w(w_xmlcoded, ts);
+    if (count % 2 == 0) {
+      w.data().document.encodexml(MyBlip());
+    } else {
+      w.data().document.encodejson(MyBlip());
+    }
+  }
+  {
+    DataWriter<TestMappedFixVector> w(w_testmappedfixvector, ts);
+    w.data().mfv["0"][0] = double(count);
+    w.data().mfv["1"][1] = double(count);
+  }
 }
 
 // Make a TypeCreator object for this module, the TypeCreator

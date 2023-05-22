@@ -15,6 +15,7 @@
 ;; Record a vector with driving inputs to a MyBlip object
 (Object BlipDrive
 	(Option msgpack)
+	(Option hdf5)
 	(IncludeFile BlipDriveExtra)
 	
 	;; input x direction
