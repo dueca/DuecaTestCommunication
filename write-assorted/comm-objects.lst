@@ -1,0 +1,15 @@
+# this file contains a list of all communicated objects needed by this
+# specific module
+# specify these with the .dco extension, examples:
+# DuecaTestCommunication/comm-objects/MyDataObject.dco
+# Generic/comm-objects/PrimaryControls.dco
+DuecaTestCommunication/comm-objects/BlipChild.dco
+DuecaTestCommunication/comm-objects/BlipDrive.dco
+DuecaTestCommunication/comm-objects/TestFixVector.dco
+DuecaTestCommunication/comm-objects/TestLimVector.dco
+DuecaTestCommunication/comm-objects/TestVarVector.dco
+DuecaTestCommunication/comm-objects/TestLists.dco
+DuecaTestCommunication/comm-objects/TestMap.dco
+DuecaTestCommunication/comm-objects/TestNestedMap.dco
+DuecaTestCommunication/comm-objects/XMLCoded.dco
+DuecaTestCommunication/comm-objects/TestMappedFixVector.dco

@@ -18,5 +18,6 @@
     <url>origin:///DuecaTestCommunication.git</url>
     <module>read-unified</module>
     <module>write-unified</module>
+    <module>write-assorted</module>
   </project>
 </machine>

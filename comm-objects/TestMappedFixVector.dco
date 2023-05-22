@@ -1,0 +1,26 @@
+;; -*-scheme-*-
+(Header "
+        from item       : TestMappedFixVector.dco
+        date            : Mon May 22 15:15:00 2023
+        category        : Dueca Communication Object specification
+        author          : repa
+        description     : Test object for hdf5 conversion
+        copyright       : (c) 2023
+        language        : C++")
+
+;; Definitions/includes for the different datatypes used in the object
+(IterableType MapFixVector
+"#include <dueca/fixvector.hxx>
+#include <map>
+#include <string>
+typedef std::map<std::string, dueca::fixvector<2,double> > MapFixVector;")
+
+;; DCO object <replace this comment>
+(Object TestMappedFixVector
+        (Option msgpack)
+        (Option hdf5)
+	(IncludeFile TestMappedFixVectorExtra)
+	;; mapped object, with a fixvector as member
+        (MapFixVector mfv)
+        )
+

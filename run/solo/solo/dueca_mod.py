@@ -8,9 +8,6 @@
 
 ## node set-up
 ecs_node = 0   # dutmms1, send order 3
-#aux_node = 1   # dutmms3, send order 1
-#pfd_node = 2   # dutmms5, send order 2
-#cl_node = 3    # dutmms4, send order 0
 
 ## priority set-up
 # normal nodes: 0 administration
@@ -111,11 +108,20 @@ if this_node_id == ecs_node:
                 set_timing = sim_timing,
                 check_timing = (10000, 20000)
             ))
+    mymods.append(
+        dueca.Module("hdf5-logger", "", log_priority).param(
+            ('set_timing', log_timing),
+            ('chunksize', 3000),
+            ('log_entry', ("MyBlip://PHLAB/1",
+                           "MyBlip", "second blip", "/entry/second")),
+            ('watch-channel', ("MyBlip://PHLAB/1", "/watched/myblip"))
+        ))
+
     filer = dueca.ReplayFiler("PHLAB")
+
 
 # etc, each node can have modules in its mymods list
 
 # then combine in an entity (one "copy" per node)
 if mymods:
     myentity = dueca.Entity("PHLAB", mymods)
-
