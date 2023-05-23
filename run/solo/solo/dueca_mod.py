@@ -1,15 +1,15 @@
-## -*-python-*-
-## this is an example dueca_mod.py file, for you to start out with and adapt
-## according to your needs. Note that you need a dueca_mod.py file only for the
-## node with number 0
+# -*-python-*-
+# this is an example dueca_mod.py file, for you to start out with and adapt
+# according to your needs. Note that you need a dueca_mod.py file only for the
+# node with number 0
 
-## in general, it is a good idea to clearly document your set up
-## this is an excellent place.
+# in general, it is a good idea to clearly document your set up
+# this is an excellent place.
 
-## node set-up
+# node set-up
 ecs_node = 0   # dutmms1, send order 3
 
-## priority set-up
+# priority set-up
 # normal nodes: 0 administration
 #               1 hdf5 logging
 #               2 simulation, unpackers
@@ -39,14 +39,14 @@ sim_priority = dueca.PrioritySpec(2, 0)
 # this is normally 100, giving 100 Hz timing
 sim_timing = dueca.TimeSpec(0, 100)
 
-## for now, display on 50 Hz
+# for now, display on 50 Hz
 display_timing = dueca.TimeSpec(0, 200)
 
-## log a bit more economical, 25 Hz
+# log a bit more economical, 25 Hz
 log_timing = dueca.TimeSpec(0, 400)
 
-## ---------------------------------------------------------------------
-### the modules needed for dueca itself
+# ---------------------------------------------------------------------
+# the modules needed for dueca itself
 if this_node_id == ecs_node:
 
     # create a list of modules:
@@ -73,57 +73,57 @@ if this_node_id == ecs_node:
     # create the entity with that list
     DUECA_entity = dueca.Entity("dueca", DUECA_mods)
 
-## ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # modules for your project (example)
 mymods = []
 
 # test creating a blip from script
-blp = dueca.MyBlip().param(identification = "ident",
-                           x = 0.4,
-                           y = 2,
-                           dx = 0.0,
-                           dy = 1.3,
-                           mode = "On").complete()
+blp = dueca.MyBlip().param(identification="ident",
+                           x=0.4,
+                           y=2,
+                           dx=0.0,
+                           dy=1.3,
+                           mode="On").complete()
 
 if this_node_id == ecs_node:
     mymods.append(
         dueca.Module(
             "write-unified", "1", admin_priority).param(
 
-                set_timing = sim_timing,
-                check_timing = (10000, 20000),
+                set_timing=sim_timing,
+                check_timing=(10000, 20000),
 
-                add_blip = "first blip",
-                place_blip = [ 20.0, 20.0, -0.1, -0.1, ]).param(
+                add_blip="first blip",
+                place_blip=[20.0, 20.0, -0.1, -0.1, ]).param(
 
-                add_blip = "second blip",
-                place_blip = [ 2, 2 ]).param(
+                add_blip="second blip",
+                place_blip=[2, 2]).param(
 
-                add_flasher_blip = "flashing",
-                place_flasher_blip = [ 300, 0.4, 4.0 ]))
+                add_flasher_blip="flashing",
+                place_flasher_blip=[300, 0.4, 4.0]))
 
     mymods.append(
         dueca.Module(
             "read-unified", "1", sim_priority).param(
-                set_timing = sim_timing,
-                check_timing = (10000, 20000)
-            ))
+                set_timing=sim_timing,
+                check_timing=(10000, 20000)
+        ))
 
     mymods.append(
         dueca.Module(
             "write-assorted", "", sim_priority).param(
-                set_timing = sim_timing,
-                check_timing = (10000, 20000)
-            )
+                set_timing=sim_timing,
+                check_timing=(10000, 20000)
         )
+    )
 
     mymods.append(
         dueca.Module("hdf5-logger", "", log_priority).param(
             ('set_timing', log_timing),
-            ('chunksize', 3000),
+            ('chunksize', 256),
+            ('filename-template', 'datalog.hdf5')
             ('log_entry', ("MyBlip://PHLAB/1",
                            "MyBlip", "second blip", "/entry/second")),
-            ('watch-channel', ("MyBlip://PHLAB/1", "/watched/myblip")),
             ('log-entry', ("BlipChild://PHLAB",
                            "BlipChild", "/entry/child")),
             ('log-entry', ("BlipDrive://PHLAB",

@@ -12,8 +12,8 @@
 (IterableType MapFixVector
 "#include <dueca/fixvector.hxx>
 #include <map>
-#include <string>
-typedef std::map<std::string, dueca::fixvector<2,double> > MapFixVector;")
+#include <dueca/stringoptions.h>
+typedef std::map<dueca::Dstring<8>, dueca::fixvector<2,double> > MapFixVector;")
 
 ;; DCO object <replace this comment>
 (Object TestMappedFixVector
