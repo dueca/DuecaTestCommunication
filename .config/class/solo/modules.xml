@@ -15,8 +15,9 @@
 -->
 <machine xmlns="https://dueca.tudelft.nl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://dueca.tudelft.nl modules.xsd">
   <project>
-    <url>remote:///DuecaTestCommunication.git</url>
+    <url>origin:///DuecaTestCommunication.git</url>
     <module>read-unified</module>
     <module>write-unified</module>
+    <module>write-assorted</module>
   </project>
 </machine>
