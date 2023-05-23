@@ -121,7 +121,7 @@ if this_node_id == ecs_node:
         dueca.Module("hdf5-logger", "", log_priority).param(
             ('set_timing', log_timing),
             ('chunksize', 256),
-            ('filename-template', 'datalog.hdf5')
+            ('filename-template', 'datalog.hdf5'),
             ('log_entry', ("MyBlip://PHLAB/1",
                            "MyBlip", "second blip", "/entry/second")),
             ('log-entry', ("BlipChild://PHLAB",
