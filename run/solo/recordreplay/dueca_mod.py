@@ -47,9 +47,11 @@ log_timing = dueca.TimeSpec(0, 400)
 
 # remove old log files if present
 import os
+import sys
 for f in os.listdir('.'):
-    if f in ('initials-PHLAB-new.toml', 'recordings-PHLAB-new.toml',
-             'datalog.hdf4'):
+    if f in ('initials-PHLAB-new.toml', 'recordings-PHLAB-new.ddff',
+             'datalog.hdf5'):
+        print(f"Removing file {f}", file=sys.stderr)
         os.remove(f)
 
 # ---------------------------------------------------------------------
