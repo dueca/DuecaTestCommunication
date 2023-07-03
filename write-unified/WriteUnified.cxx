@@ -647,7 +647,11 @@ bool WriteUnified::NormalBlipSpec::isValid()
   CHECK_TOKEN(token);
 
   if (res) {
-    drive_recorder.complete(getEntity(), token);
+    //drive_recorder.complete(getEntity(), token);
+    drive_recorder.complete
+      (getEntity(),
+       std::string("WriteUnified:") + std::string(b.identification.c_str()),
+       "BlipDrive");
   }
   CHECK_RECORDER(drive_recorder);
 
