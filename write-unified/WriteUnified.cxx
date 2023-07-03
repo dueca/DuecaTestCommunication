@@ -473,7 +473,7 @@ void WriteUnified::doCalculation(const TimeSpec& ts)
     break;
     }
 
-  case SimulationState::Replay:
+  case SimulationState::Replay: 
   case SimulationState::Advance: {
 
     if (getCurrentState() == SimulationState::Advance) {
@@ -485,14 +485,14 @@ void WriteUnified::doCalculation(const TimeSpec& ts)
         ii->b.dy += bd.ry;
         ii->b.x += ii->b.dx * dt;
         ii->b.y += ii->b.dy * dt;
-        //ii->drive_recorder.record(ts, bd);
+        ii->drive_recorder.record(ts, bd);
       }
     }
     else {
       for (BlipList::iterator ii = bliplist.begin();
            ii != bliplist.end(); ii++) {
         BlipDrive bd;
-        //ii->drive_recorder.replay(ts, bd);
+        ii->drive_recorder.replay(ts, bd);
         ii->b.dx += bd.rx;
         ii->b.dy += bd.ry;
         ii->b.x += ii->b.dx * dt;
