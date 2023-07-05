@@ -13,6 +13,7 @@ typedef std::map<string16,MyBlip> blipmap;")
 
 ;; Event, Stream, should not matter any more
 (Event TestNestedMap
-        (Option hdf5)
+       (Option hdf5)
+       (Option msgpack)
        ;; map with items
        (blipmap blips))

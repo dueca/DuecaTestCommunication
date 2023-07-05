@@ -12,5 +12,6 @@ typedef dueca::varvector<uint32_t> vvector;")
 ;; Event, Stream, should not matter any more
 (Event TestVarVector
        (Option hdf5)
+       (Option msgpack)
        ;; map with items
        (vvector nums (DefaultSize 0)))
