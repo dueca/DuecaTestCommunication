@@ -6,9 +6,10 @@
         description    : Testing map packing, unpacking and inspection,
                          with nested data")
 
-(IterableType blipmap "#include <map>
-#include <stringoptions.h>
+(IterableType blipmap "
 #include \"MyBlip.hxx\"
+#include <map>
+#include <stringoptions.h>
 typedef std::map<string16,MyBlip> blipmap;")
 
 ;; Event, Stream, should not matter any more

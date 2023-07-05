@@ -7,8 +7,7 @@
 
 (IterableVarSizeType blipvector "
 #include \"MyBlip.hxx\"
-#include <limvector.hxx>
-#include <stringoptions.h>
+#include <dueca/limvector.hxx>
 typedef dueca::limvector<4,MyBlip> blipvector;")
 
 ;; Event, Stream, should not matter any more
