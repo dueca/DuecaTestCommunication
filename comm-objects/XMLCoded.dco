@@ -10,7 +10,8 @@
 ;; Object to carry XML data
 (Event XMLCoded
        (Option hdf5)
-
+       (Option msgpack)
+       
        ;; xml data
        (dueca::smartstring document)
        )

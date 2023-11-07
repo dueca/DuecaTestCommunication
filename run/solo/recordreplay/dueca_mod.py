@@ -61,7 +61,8 @@ if this_node_id == ecs_node:
     # create a list of modules:
     DUECA_mods = []
     DUECA_mods.append(dueca.Module("dusime", "", admin_priority))
-    DUECA_mods.append(dueca.Module("dueca-view", "", admin_priority))
+    DUECA_mods.append(dueca.Module("dueca-view", "", admin_priority).param(
+        position_size = (5, 5)))
     DUECA_mods.append(dueca.Module("activity-view", "", admin_priority))
     DUECA_mods.append(dueca.Module("timing-view", "", admin_priority))
     DUECA_mods.append(dueca.Module("log-view", "", admin_priority))
@@ -131,8 +132,8 @@ if this_node_id == ecs_node:
             ('set_timing', log_timing),
             ('chunksize', 256),
             ('filename-template', 'datalog.hdf5'),
-            ('log_entry', ("MyBlip://PHLAB/1",
-                           "MyBlip", "second blip", "/entry/second")),
+            ('watch_channel', ("MyBlip://PHLAB/1",
+                           "/entry/blips")),
             ('log-entry', ("BlipChild://PHLAB",
                            "BlipChild", "/entry/child")),
             ('log-entry', ("BlipDrive://PHLAB",
