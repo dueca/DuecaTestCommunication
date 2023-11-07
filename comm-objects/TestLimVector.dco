@@ -5,13 +5,14 @@
         date           : 131225
         description    : Testing limvector")
 
-(IterableVarSizeType blipvector "#include <limvector.hxx>
-#include <stringoptions.h>
+(IterableVarSizeType blipvector "
 #include \"MyBlip.hxx\"
+#include <dueca/limvector.hxx>
 typedef dueca::limvector<4,MyBlip> blipvector;")
 
 ;; Event, Stream, should not matter any more
 (Event TestLimVector
        (Option hdf5)
+       (Option msgpack)
        ;; map with items
        (blipvector blips (DefaultSize 0)))

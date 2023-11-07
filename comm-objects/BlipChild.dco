@@ -11,6 +11,7 @@
 ;; test of inheritance in combination with hdf5 nested object & saving
 (Event BlipChild
        (Inherits MyBlip)
+       (Option msgpack)
        (Option hdf5nest)
        ;; dummy counter
        (uint32_t count)

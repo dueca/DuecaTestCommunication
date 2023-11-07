@@ -12,5 +12,6 @@
 ;; object that contains an stl map
 (Event TestMap
        (Option hdf5)
+       (Option msgpack)
        ;; map with items
        (std::map<dueca::Dstring<16>,int32_t> items))

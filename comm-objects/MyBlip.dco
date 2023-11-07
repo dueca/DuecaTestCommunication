@@ -1,7 +1,6 @@
 ;; -*-scheme-*-
-(Type float "#include <dueca/msgpack.hxx>")
+(Type float)
 (Type string64 "#include <stringoptions.h>")
-(Type vstring "#include <stringoptions.h>")
 (Enum Mode uint8_t On Off)
 
 ;; Example object for testing the MultiStreamChannel.

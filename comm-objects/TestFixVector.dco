@@ -13,5 +13,6 @@ typedef dueca::fixvector<4,uint32_t> fvector;")
 ;; Object that contains a fixed-size vector
 (Event TestFixVector
        (Option hdf5)
+       (Option msgpack)
        ;; map with items
        (fvector nums))
