@@ -12,3 +12,5 @@ DATADIR=../../run-data
 if [ ! -d runlogs ]; then
    mkdir runlogs
 fi
+
+ln -sf ../../../build/dueca_run.x .
