@@ -1,0 +1,19 @@
+;; -*-scheme-*-
+(Header "
+        from item       : TriggerD.dco
+        date            : Thu Nov  9 09:27:40 2023
+        category        : Dueca Communication Object specification
+        author          : repa
+        description     : Triggering test data object
+        copyright       : (c) 2023
+        language        : C++")
+
+;; Use time tick type of DUECA
+(Type dueca::TimeTickType "#include <dueca/SimTime.hxx>")
+
+;; Triggering test data object
+(Object TriggerD
+
+        ;; start time of the trigger
+        (dueca::TimeTickType ticktime)
+        )
