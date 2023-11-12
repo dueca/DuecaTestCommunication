@@ -23,7 +23,7 @@ USING_DUECA_NS;
 // include headers for functions/classes you need in the module
 
 
-/** A simulation module.
+/** Channel triggering test module.
 
     The instructions to create an module of this class from the start
     script are:

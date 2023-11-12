@@ -76,7 +76,7 @@ CheckTriggering::CheckTriggering(Entity* e, const char* part, const
          getclassname<TriggerD>(), "stream_1_1", Channel::Continuous),
   w_e1_1(getId(),
          NameSet(getEntity(), getclassname<TriggerD>(), "event_1_1"),
-         getclassname<TriggerD>(), "stream_1_1", Channel::Events),
+         getclassname<TriggerD>(), "event_1_1", Channel::Events),
   r_s1_1(getId(),
          NameSet(getEntity(), getclassname<TriggerD>(), "stream_1_1"),
          getclassname<TriggerD>(), 0, Channel::Continuous),
@@ -225,10 +225,11 @@ void CheckTriggering::stopModule(const TimeSpec &time)
 // appropriate output
 void CheckTriggering::doSend_1_1(const TimeSpec& ts)
 {
+  assert(ts.getValiditySpan() != 0);
   ts_1_1 = ts;
   DataWriter<TriggerD> ws(w_s1_1, ts);
   ws.data().ticktime = ts_1_1.getValidityStart();
-  DataWriter<TriggerD> we(w_e1_1, ts);
+  DataWriter<TriggerD> we(w_e1_1, ts.getValidityStart());
   we.data().ticktime = ts_1_1.getValidityStart();
 }
 
@@ -265,15 +266,30 @@ void CheckTriggering::doCheck_s1_1(const TimeSpec& ts)
 
 void CheckTriggering::doCheck_e1_1(const TimeSpec& ts)
 {
-  DataTimeSpec tsrange(ts.getValidityStart(), 100);
+  // there should be once visible dataset here, and visible for the
+  // current ts.
+
+  // This triggers on an event channel, and the called timespec
+  // should be a point timepec
+  assert(ts.getValiditySpan() == 0);
+
+  DataTimeSpec tsrange(ts.getValidityStart(),
+                       ts.getValidityStart() + ts_1_1.getValiditySpan());
+  DataTimeSpec tsrangeprev(ts.getValidityStart()  - ts_1_1.getValiditySpan(),
+                           ts.getValidityStart());
+  // check there is any visible dataset
   if (not r_e1_1.haveVisibleSets()) {
     W_MOD("doCheck_e1_1 expected haveVisibleSets()");
     nfault++;
   }
+
+  // check the number of totally visible datasets
   if (not r_e1_1.getNumVisibleSets() == 1) {
     W_MOD("doCheck_e1_1 expected 1 getNumVisibleSets()");
     nfault++;
   }
+
+  // check again for the current time spec
   if (not r_e1_1.haveVisibleSets(ts)) {
     W_MOD("doCheck_e1_1 expected haveVisibleSets() with point ts");
     nfault++;
@@ -282,6 +298,8 @@ void CheckTriggering::doCheck_e1_1(const TimeSpec& ts)
     W_MOD("doCheck_e1_1 expected 1 getNumVisibleSets() with point ts");
     nfault++;
   }
+
+  // and check for a range time spec
   if (not r_e1_1.haveVisibleSets(tsrange)) {
     W_MOD("doCheck_e1_1 expected haveVisibleSets() with range ts");
     nfault++;
@@ -290,6 +308,18 @@ void CheckTriggering::doCheck_e1_1(const TimeSpec& ts)
     W_MOD("doCheck_e1_1 expected 1 getNumVisibleSets() with range ts");
     nfault++;
   }
+
+  // now check there is nothing for the previous range
+    // and check for a range time spec
+  if (r_e1_1.haveVisibleSets(tsrangeprev)) {
+    W_MOD("doCheck_e1_1 expected no haveVisibleSets() with previous range");
+    nfault++;
+  }
+  if (not r_e1_1.getNumVisibleSets(tsrangeprev) == 0) {
+    W_MOD("doCheck_e1_1 expected 0 getNumVisibleSets() with previous range");
+    nfault++;
+  }
+
   try {
     DataReader<TriggerD> re(r_e1_1, ts);
     if (re.data().ticktime != ts_1_1.getValidityStart()) {
