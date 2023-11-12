@@ -72,29 +72,29 @@ CheckTriggering::CheckTriggering(Entity* e, const char* part, const
   nfault(0),
 
   w_s1_1(getId(),
-	 NameSet(getEntity(), getclassname<TriggerD>(), "stream_1_1"),
-	 getclassname<TriggerD>(), "stream_1_1", Channel::Continuous),
+         NameSet(getEntity(), getclassname<TriggerD>(), "stream_1_1"),
+         getclassname<TriggerD>(), "stream_1_1", Channel::Continuous),
   w_e1_1(getId(),
-	 NameSet(getEntity(), getclassname<TriggerD>(), "event_1_1"),
-	 getclassname<TriggerD>(), "stream_1_1", Channel::Events),
+         NameSet(getEntity(), getclassname<TriggerD>(), "event_1_1"),
+         getclassname<TriggerD>(), "stream_1_1", Channel::Events),
   r_s1_1(getId(),
-	 NameSet(getEntity(), getclassname<TriggerD>(), "stream_1_1"),
-	 getclassname<TriggerD>(), 0, Channel::Continuous),
+         NameSet(getEntity(), getclassname<TriggerD>(), "stream_1_1"),
+         getclassname<TriggerD>(), 0, Channel::Continuous),
   r_e1_1(getId(),
-	 NameSet(getEntity(), getclassname<TriggerD>(), "event_1_1"),
-	 getclassname<TriggerD>(), 0, Channel::Events),
+         NameSet(getEntity(), getclassname<TriggerD>(), "event_1_1"),
+         getclassname<TriggerD>(), 0, Channel::Events),
   r_s1_1_pp(getId(),
-	    NameSet(getEntity(), getclassname<TriggerD>(), "stream_1_1"),
-	    getclassname<TriggerD>(), 0, Channel::Continuous),
+            NameSet(getEntity(), getclassname<TriggerD>(), "stream_1_1"),
+            getclassname<TriggerD>(), 0, Channel::Continuous),
   r_e1_1_pp(getId(),
-	    NameSet(getEntity(), getclassname<TriggerD>(), "event_1_1"),
-	    getclassname<TriggerD>(), 0, Channel::Events),
+            NameSet(getEntity(), getclassname<TriggerD>(), "event_1_1"),
+            getclassname<TriggerD>(), 0, Channel::Events),
   r_s1_1_pm(getId(),
-	    NameSet(getEntity(), getclassname<TriggerD>(), "stream_1_1"),
-	    getclassname<TriggerD>(), 0, Channel::Continuous),
+            NameSet(getEntity(), getclassname<TriggerD>(), "stream_1_1"),
+            getclassname<TriggerD>(), 0, Channel::Continuous),
   r_e1_1_pm(getId(),
-	    NameSet(getEntity(), getclassname<TriggerD>(), "event_1_1"),
-	    getclassname<TriggerD>(), 0, Channel::Events),
+            NameSet(getEntity(), getclassname<TriggerD>(), "event_1_1"),
+            getclassname<TriggerD>(), 0, Channel::Events),
 
   cb0(this, &_ThisModule_::doSend_1_1),
   do_1_1(getId(), "stream+event trigger, 1step", &cb0, ps),
@@ -107,19 +107,19 @@ CheckTriggering::CheckTriggering(Entity* e, const char* part, const
 
   cb3(this, &_ThisModule_::doCheck_s1_1_pp),
   do_s1_1_pp(getId(), "stream, 1/1, high prio", &cb3,
-	     PrioritySpec(ps.getPriority()+1, 0)),
+             PrioritySpec(ps.getPriority()+1, 0)),
 
   cb4(this, &_ThisModule_::doCheck_e1_1_pp),
   do_e1_1_pp(getId(), "event, 1/1, high prio", &cb4,
-	     PrioritySpec(ps.getPriority()+1, 0)),
+             PrioritySpec(ps.getPriority()+1, 0)),
 
   cb5(this, &_ThisModule_::doCheck_s1_1_pm),
   do_s1_1_pm(getId(), "stream, 1/1, lower prio", &cb5,
-	     PrioritySpec(ps.getPriority()-1, 0)),
+             PrioritySpec(ps.getPriority()-1, 0)),
 
   cb6(this, &_ThisModule_::doCheck_e1_1_pm),
   do_e1_1_pm(getId(), "event, 1/1, lower prio", &cb6,
-	     PrioritySpec(ps.getPriority()-1, 0)),
+             PrioritySpec(ps.getPriority()-1, 0)),
 
   myclock()
 {
@@ -239,7 +239,7 @@ void CheckTriggering::doCheck_s1_1(const TimeSpec& ts)
     DataReader<TriggerD> rs(r_s1_1, ts);
     if (rs.data().ticktime != ts_1_1.getValidityStart()) {
       W_MOD("doCheck_s1_1 mismatch, ts_1_1=" << ts_1_1 <<
-	    " ticktime=" << rs.data().ticktime);
+            " ticktime=" << rs.data().ticktime);
       nfault++;
     }
   }
@@ -252,39 +252,88 @@ void CheckTriggering::doCheck_s1_1(const TimeSpec& ts)
     DataReader<TriggerD,MatchIntervalStartOrEarlier> rs(r_s1_1);
     if (rs.timeSpec() != ts) {
       W_MOD("doCheck_s1_1 latest missmatch, data: " << rs.timeSpec() <<
-	    " act=" << ts);
+            " act=" << ts);
       nfault++;
     }
   }
   catch (const std::exception& e) {
     W_MOD("doCheck_s1_1 cannot read stream latest, at " << ts << " : "
-	  << e.what());
+          << e.what());
     nfault++;
   }
 }
 
 void CheckTriggering::doCheck_e1_1(const TimeSpec& ts)
 {
+  DataTimeSpec tsrange(ts.getValidityStart(), 100);
+  if (not r_e1_1.haveVisibleSets()) {
+    W_MOD("doCheck_e1_1 expected haveVisibleSets()");
+    nfault++;
+  }
+  if (not r_e1_1.getNumVisibleSets() == 1) {
+    W_MOD("doCheck_e1_1 expected 1 getNumVisibleSets()");
+    nfault++;
+  }
+  if (not r_e1_1.haveVisibleSets(ts)) {
+    W_MOD("doCheck_e1_1 expected haveVisibleSets() with point ts");
+    nfault++;
+  }
+  if (not r_e1_1.getNumVisibleSets(ts) == 1) {
+    W_MOD("doCheck_e1_1 expected 1 getNumVisibleSets() with point ts");
+    nfault++;
+  }
+  if (not r_e1_1.haveVisibleSets(tsrange)) {
+    W_MOD("doCheck_e1_1 expected haveVisibleSets() with range ts");
+    nfault++;
+  }
+  if (not r_e1_1.getNumVisibleSets(tsrange) == 1) {
+    W_MOD("doCheck_e1_1 expected 1 getNumVisibleSets() with range ts");
+    nfault++;
+  }
   try {
     DataReader<TriggerD> re(r_e1_1, ts);
     if (re.data().ticktime != ts_1_1.getValidityStart()) {
       W_MOD("doCheck_e1_1 mismatch, ts_1_1=" << ts_1_1 <<
-	    " ticktime=" << re.data().ticktime);
+            " ticktime=" << re.data().ticktime);
       nfault++;
     }
     if (re.timeSpec().getValidityStart() != ts_1_1.getValidityStart()) {
        W_MOD("doCheck_e1_1 mismatch, ts_1_1=" << ts_1_1 <<
-	     " datatimespec=" << re.timeSpec());
+             " datatimespec=" << re.timeSpec());
       nfault++;
     }
     if (re.timeSpec().getValidityStart() != ts.getValidityStart()) {
        W_MOD("doCheck_e1_1 mismatch, ts=" << ts <<
-	     " datatimespec=" << re.timeSpec());
+             " datatimespec=" << re.timeSpec());
       nfault++;
     }
   }
   catch (const std::exception& e) {
     W_MOD("doCheck_e1_1 cannot read event seq, at " << ts << " : " << e.what());
+    nfault++;
+  }
+  if (r_e1_1.haveVisibleSets(ts)) {
+    W_MOD("doCheck_e1_1 should no longer haveVisibleSets()");
+    nfault++;
+  }
+  if (not r_e1_1.getNumVisibleSets(ts) == 0) {
+    W_MOD("doCheck_e1_1 expected 0 getNumVisibleSets()");
+    nfault++;
+  }
+  if (r_e1_1.haveVisibleSets(ts)) {
+    W_MOD("doCheck_e1_1 should no longer haveVisibleSets() with point ts");
+    nfault++;
+  }
+  if (not r_e1_1.getNumVisibleSets(ts) == 0) {
+    W_MOD("doCheck_e1_1 expected 0 getNumVisibleSets() with point ts");
+    nfault++;
+  }
+  if (r_e1_1.haveVisibleSets(tsrange)) {
+    W_MOD("doCheck_e1_1 should no longer haveVisibleSets() with range ts");
+    nfault++;
+  }
+  if (not r_e1_1.getNumVisibleSets(tsrange) == 0) {
+    W_MOD("doCheck_e1_1 expected 0 getNumVisibleSets() with range ts");
     nfault++;
   }
 }
@@ -296,13 +345,13 @@ void CheckTriggering::doCheck_s1_1_pp(const TimeSpec& ts)
     DataReader<TriggerD> rs(r_s1_1_pp, ts);
     if (rs.data().ticktime != ts_1_1.getValidityStart()) {
       W_MOD("doCheck_s1_1_pp mismatch, ts_1_1=" << ts_1_1 <<
-	    " ticktime=" << rs.data().ticktime);
+            " ticktime=" << rs.data().ticktime);
       nfault++;
     }
   }
   catch (const std::exception& e) {
     W_MOD("doCheck_s1_1_pp cannot read stream with timespec, at " << ts <<
-	  " : " << e.what());
+          " : " << e.what());
     nfault++;
   }
   try {
@@ -310,13 +359,13 @@ void CheckTriggering::doCheck_s1_1_pp(const TimeSpec& ts)
     DataReader<TriggerD,MatchIntervalStartOrEarlier> rs(r_s1_1_pp);
     if (rs.timeSpec() != ts) {
       W_MOD("doCheck_s1_1_pp latest missmatch, data: " << rs.timeSpec() <<
-	    " act=" << ts);
+            " act=" << ts);
       nfault++;
     }
   }
   catch (const std::exception& e) {
     W_MOD("doCheck_s1_1_pp cannot read stream latest, at " << ts <<
-	  " : " << e.what());
+          " : " << e.what());
     nfault++;
   }
 }
@@ -327,23 +376,23 @@ void CheckTriggering::doCheck_e1_1_pp(const TimeSpec& ts)
     DataReader<TriggerD> re(r_e1_1_pp, ts);
     if (re.data().ticktime != ts_1_1.getValidityStart()) {
       W_MOD("doCheck_e1_1_pp mismatch, ts_1_1=" << ts_1_1 <<
-	    " ticktime=" << re.data().ticktime);
+            " ticktime=" << re.data().ticktime);
       nfault++;
     }
     if (re.timeSpec().getValidityStart() != ts_1_1.getValidityStart()) {
        W_MOD("doCheck_e1_1_pp mismatch, ts_1_1=" << ts_1_1 <<
-	     " datatimespec=" << re.timeSpec());
+             " datatimespec=" << re.timeSpec());
       nfault++;
     }
     if (re.timeSpec().getValidityStart() != ts.getValidityStart()) {
        W_MOD("doCheck_e1_1_pp mismatch, ts=" << ts <<
-	     " datatimespec=" << re.timeSpec());
+             " datatimespec=" << re.timeSpec());
       nfault++;
     }
   }
   catch (const std::exception& e) {
     W_MOD("doCheck_e1_1_pp cannot read event seq, at " << ts <<
-	  " : " << e.what());
+          " : " << e.what());
     nfault++;
   }
 }
@@ -355,13 +404,13 @@ void CheckTriggering::doCheck_s1_1_pm(const TimeSpec& ts)
     DataReader<TriggerD> rs(r_s1_1_pm, ts);
     if (rs.data().ticktime != ts_1_1.getValidityStart()) {
       W_MOD("doCheck_s1_1_pm mismatch, ts_1_1=" << ts_1_1 <<
-	    " ticktime=" << rs.data().ticktime);
+            " ticktime=" << rs.data().ticktime);
       nfault++;
     }
   }
   catch (const std::exception& e) {
     W_MOD("doCheck_s1_1_pm cannot read stream with timespec, at " << ts <<
-	  " : " << e.what());
+          " : " << e.what());
     nfault++;
   }
   try {
@@ -369,13 +418,13 @@ void CheckTriggering::doCheck_s1_1_pm(const TimeSpec& ts)
     DataReader<TriggerD,MatchIntervalStartOrEarlier> rs(r_s1_1_pm);
     if (rs.timeSpec() != ts) {
       W_MOD("doCheck_s1_1_pm latest missmatch, data: " << rs.timeSpec() <<
-	    " act=" << ts);
+            " act=" << ts);
       nfault++;
     }
   }
   catch (const std::exception& e) {
     W_MOD("doCheck_s1_1_pm cannot read stream latest, at " << ts <<
-	  " : " << e.what());
+          " : " << e.what());
     nfault++;
   }
 }
@@ -386,23 +435,23 @@ void CheckTriggering::doCheck_e1_1_pm(const TimeSpec& ts)
     DataReader<TriggerD> re(r_e1_1_pm, ts);
     if (re.data().ticktime != ts_1_1.getValidityStart()) {
       W_MOD("doCheck_e1_1_pm mismatch, ts_1_1=" << ts_1_1 <<
-	    " ticktime=" << re.data().ticktime);
+            " ticktime=" << re.data().ticktime);
       nfault++;
     }
     if (re.timeSpec().getValidityStart() != ts_1_1.getValidityStart()) {
        W_MOD("doCheck_e1_1_pm mismatch, ts_1_1=" << ts_1_1 <<
-	     " datatimespec=" << re.timeSpec());
+             " datatimespec=" << re.timeSpec());
       nfault++;
     }
     if (re.timeSpec().getValidityStart() != ts.getValidityStart()) {
        W_MOD("doCheck_e1_1_pm mismatch, ts=" << ts <<
-	     " datatimespec=" << re.timeSpec());
+             " datatimespec=" << re.timeSpec());
       nfault++;
     }
   }
   catch (const std::exception& e) {
     W_MOD("doCheck_e1_1_pm cannot read event seq, at " << ts <<
-	  " : " << e.what());
+          " : " << e.what());
     nfault++;
   }
 }
