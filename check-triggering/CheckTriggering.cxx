@@ -21,9 +21,11 @@
 // the standard package for DUSIME, including template source
 #define DO_INSTANTIATE
 #include <dueca.h>
+#include <dueca/Environment.hxx>
 
 // include the debug writing header, by default, write warning and
 // error messages
+#define I_MOD
 #define W_MOD
 #define E_MOD
 #include <debug.h>
@@ -143,7 +145,13 @@ bool CheckTriggering::complete()
 // destructor
 CheckTriggering::~CheckTriggering()
 {
-  //
+  if (nfault != 0) {
+    I_MOD("Signalling return value " << nfault);
+    Environment::getInstance()->setExitCode(nfault);
+  }
+  else {
+    I_MOD("No faults detected");
+  }
 }
 
 // as an example, the setTimeSpec function
