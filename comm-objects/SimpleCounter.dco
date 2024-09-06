@@ -1,0 +1,21 @@
+;; -*-scheme-*-
+(Header "
+        from item       : SimpleCounter.dco
+        date            : Fri Sep  6 17:25:52 2024
+        category        : Dueca Communication Object specification
+        author          : repa
+        description     : Counter for communication tests
+        copyright       : (c) 2024
+        language        : C++")
+
+;; Definitions/includes for the different datatypes used in the object
+(Type int)
+
+;; DCO object <replace this comment>
+(Object SimpleCounter
+        (Option msgpack)
+        (Option hdf5)
+
+        ;; Simple counter to send around and check
+        (int count (Default 0))
+        )
