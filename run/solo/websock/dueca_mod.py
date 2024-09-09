@@ -39,7 +39,7 @@ sim_priority = dueca.PrioritySpec(2, 0)
 # timing set-up
 
 # simulation process, this is normally 100, giving 100 Hz timing
-sim_timing = dueca.TimeSpec(0, 100)
+sim_timing = dueca.TimeSpec(0, 1000)
 
 ## for now, display on 50 Hz
 display_timing = dueca.TimeSpec(0, 200)
@@ -54,7 +54,7 @@ log_timing = dueca.TimeSpec(0, 400)
 
 ## the name for the main entity to create. Note that you can create as
 ## many entities as you want, usually one is enough. Adjust as appropriate
-entity_name = "PHLAB"
+entity_name = "wstest"
 
 ## ---------------------------------------------------------------------
 ### the modules needed for dueca itself
@@ -98,44 +98,38 @@ mymods = []
 ## [modules] modules to be created in each node
 if this_node_id == ecs_node:
 
-    pass
-    #mymods.append(dueca.Module(
-    #    "some-module-i-created", "", sim_priority).param(
-    #        set_timing = sim_timing,
-    #        check_timing = (10000, 20000)))
+    mymods.append(dueca.Module(
+        'read-write-server', '', sim_priority).param(
+            set_timing = sim_timing,
+            check_timing = (2000, 8000),
+            read_channel = f'SimpleCounter://{entity_name}/upstream',
+            write_channel = f'SimpleCounter://{entity_name}/downstream',
+            ncycles = 3
+        )
+    )
 
-    # Uncomment and adapt for web-based graph, see DUECA documentation.
-    # This also serves the static files for the default plotting application
-    # over http.
-    # adjust the priority if you need this for other, time-critical, data
-    #
-    # mymods.append(
-    #     dueca.Module(
-    #         "web-sockets-server", "", admin_priority).param(
-    #             ('set-timing', sim_timing),
-    #             ('check-timing', (5000, 9000)),
-    #             ('port', 8001),
-    #             ('info', ("endpoint", "MyData://"+entity_name)),
-    #             ('write-and-read', ("plotconfig",
-    #                                 "ConfigFileRequest://dueca",
-    #                                 "ConfigFileData://dueca")),
-    #             ('http-port', 8000),
-    #             ('document-root', '/usr/share/dplotter/dist')))
-
-    # uncomment and adapt for HDF5 logging, see DUECA documentation
-    # mymods.append(
-    #     dueca.Module(
-    #         "hdf5-logger", "", log_priority).param(
-    #             ('set_timing', log_timing),
-    #             ('chunksize', 3000),
-    #             ('log_entry', ("MyData://"+entity_name,
-    #                            "MyData", "/data/mydata"))))
-    #     )
-
-# etc, each node can have modules in its mymods list
-
-    # add a filer in this node for replay support
-    # filer = dueca.ReplayFiler(entity_name)
+    mymods.append(
+        dueca.Module(
+            "web-sockets-server", "", admin_priority).param(
+                 ('set-timing', sim_timing),
+                 ('check-timing', (5000, 9000)),
+                 ('port', 8001),
+                 ('write-and-read', ("server",
+                                     f"SimpleCounter://{entity_name}/upstream",
+                                     f"SimpleCounter://{entity_name}/downstream"))
+            )
+    )
+    mymods.append(
+        dueca.Module(
+            "web-sockets-server-msgpack", "", admin_priority).param(
+                 ('set-timing', sim_timing),
+                 ('check-timing', (5000, 9000)),
+                 ('port', 8002),
+                 ('write-and-read', ("server",
+                                     f"SimpleCounter://{entity_name}/upstream",
+                                     f"SimpleCounter://{entity_name}/downstream"))
+            )
+    )
 
 # then combine in an entity
 if mymods:

@@ -10,12 +10,15 @@
         copyright       : (c)
 */
 
-
+#include "ChannelWatcher.hxx"
+#include "CommObjectTraits.hxx"
+#include "SimpleCounter.hxx"
 #define ReadWriteServer_cxx
 // include the definition of the module class
 #include "ReadWriteServer.hxx"
 
 // include additional files needed for your calculation here
+#include <algorithm>
 
 // the standard package for DUSIME, including template source
 #define DO_INSTANTIATE
@@ -24,15 +27,15 @@
 // include the debug writing header. Warning and error messages
 // are on by default, debug and info can be selected by
 // uncommenting the respective defines
-//#define D_MOD
-//#define I_MOD
+// #define D_MOD
+// #define I_MOD
 #include <debug.h>
 
 // class/module name
-const char* const ReadWriteServer::classname = "read-write-server";
+const char *const ReadWriteServer::classname = "read-write-server";
 
 // initial condition/trim table
-const IncoTable* ReadWriteServer::getMyIncoTable()
+const IncoTable *ReadWriteServer::getMyIncoTable()
 {
   static IncoTable inco_table[] = {
     // enter pairs of IncoVariable and VarProbe pointers (i.e.
@@ -45,22 +48,37 @@ const IncoTable* ReadWriteServer::getMyIncoTable()
 //       (REF_MEMBER(&_ThisModule_::i_example))}
 
     // always close off with:
-    { NULL, NULL} };
+    { NULL, NULL }
+  };
 
   return inco_table;
 }
 
 // parameters to be inserted
-const ParameterTable* ReadWriteServer::getMyParameterTable()
+const ParameterTable *ReadWriteServer::getMyParameterTable()
 {
   static const ParameterTable parameter_table[] = {
     { "set-timing",
-      new MemberCall<_ThisModule_,TimeSpec>
-        (&_ThisModule_::setTimeSpec), set_timing_description },
+      new MemberCall<_ThisModule_, TimeSpec>(&_ThisModule_::setTimeSpec),
+      set_timing_description },
 
     { "check-timing",
-      new MemberCall<_ThisModule_,std::vector<int> >
-      (&_ThisModule_::checkTiming), check_timing_description },
+      new MemberCall<_ThisModule_, std::vector<int>>(
+        &_ThisModule_::checkTiming),
+      check_timing_description },
+
+    {
+      "read-channel",
+      new VarProbe<_ThisModule_, std::string>(&_ThisModule_::readchannel_name),
+      "Channel to monitor for client entries",
+    },
+
+    { "write-channel",
+      new VarProbe<_ThisModule_, std::string>(&_ThisModule_::writechannel_name),
+      "Channel name for writing client replies" },
+
+    { "ncycles", new VarProbe<_ThisModule_, int>(&_ThisModule_::ncycles),
+      "Number of cycles to count" },
 
     /* You can extend this table with labels and MemberCall or
        VarProbe pointers to perform calls or insert values into your
@@ -73,14 +91,15 @@ const ParameterTable* ReadWriteServer::getMyParameterTable()
     /* The table is closed off with NULL pointers for the variable
        name and MemberCall/VarProbe object. The description is used to
        give an overall description of the module. */
-    { NULL, NULL, "please give a description of this module"} };
+    { NULL, NULL, "Test service for the websocket server communication." }
+  };
 
   return parameter_table;
 }
 
 // constructor
-ReadWriteServer::ReadWriteServer(Entity* e, const char* part, const
-                       PrioritySpec& ps) :
+ReadWriteServer::ReadWriteServer(Entity *e, const char *part,
+                                 const PrioritySpec &ps) :
   /* The following line initialises the SimulationModule base class.
      You always pass the pointer to the entity, give the classname and the
      part arguments.
@@ -93,34 +112,28 @@ ReadWriteServer::ReadWriteServer(Entity* e, const char* part, const
   SimulationModule(e, classname, part, getMyIncoTable(), 4),
 
   // initialize the data you need in your simulation
-
-  // initialize the data you need for the trim calculation
-
-  // initialize the channel access tokens, check the documentation for the
-  // various parameters. Some examples:
-  // r_mytoken(getId(), NameSet(getEntity(), MyData::classname, part),
-  //           MyData::classname, 0, Channel::Events, Channel::ReadAllData),
-  // w_mytoken(getId(), NameSet(getEntity(), MyData::classname, part),
-  //           MyData::classname, "label", Channel::Continuous),
-
-  // activity initialization
-  // myclock(),
+  clients(),
+  readchannel_name(),
+  writechannel_name(),
+  ncycles(100),
+  watcher(),
+  totalclients(0),
+  myclock(),
   cb1(this, &_ThisModule_::doCalculation),
   do_calc(getId(), "send data and check-up", &cb1, ps)
 {
-  // do the actions you need for the simulation
-
   // connect the triggers for simulation
-  do_calc.setTrigger(/* fill in your triggering channels,
-                        or enter the clock here */);
-
-  // connect the triggers for trim calculation. Leave this out if you
-  // don not need input for trim calculation
-  trimCalculationCondition(/* fill in your trim triggering channels */);
+  do_calc.setTrigger(myclock);
 }
 
 bool ReadWriteServer::complete()
 {
+  if (!readchannel_name.size() || !writechannel_name.size()) {
+    E_MOD("Specify channel names for the ReadWriteServer");
+    return false;
+  }
+  watcher.reset(new ChannelWatcher(readchannel_name, true));
+
   /* All your parameters have been set. You may do extended
      initialisation here. Return false if something is wrong. */
   return true;
@@ -129,19 +142,30 @@ bool ReadWriteServer::complete()
 // destructor
 ReadWriteServer::~ReadWriteServer()
 {
-  //
+  if (totalclients) {
+    if (clients.size()) {
+      for (const auto &c: clients) {
+        E_MOD("Remaining uncompleted client for " << c.label << " phase " << c.phase << " count " << c.counter);
+      }
+      exit(1);
+    }
+  }
+  else {
+    W_MOD("No clients on " << readchannel_name);
+  }
 }
 
 // as an example, the setTimeSpec function
-bool ReadWriteServer::setTimeSpec(const TimeSpec& ts)
+bool ReadWriteServer::setTimeSpec(const TimeSpec &ts)
 {
   // a time span of 0 is not acceptable
-  if (ts.getValiditySpan() == 0) return false;
+  if (ts.getValiditySpan() == 0)
+    return false;
 
   // specify the timespec to the activity
-  do_calc.setTimeSpec(ts);
+  // do_calc.setTimeSpec(ts);
   // or do this with the clock if you have it (don't do both!)
-  // myclock.changePeriodAndOffset(ts);
+  myclock.changePeriodAndOffset(ts);
 
   // do whatever else you need to process this in your model
   // hint: ts.getDtInSeconds()
@@ -151,7 +175,7 @@ bool ReadWriteServer::setTimeSpec(const TimeSpec& ts)
 }
 
 // and the checkTiming function
-bool ReadWriteServer::checkTiming(const std::vector<int>& i)
+bool ReadWriteServer::checkTiming(const std::vector<int> &i)
 {
   if (i.size() == 3) {
     new TimingCheck(do_calc, i[0], i[1], i[2]);
@@ -170,13 +194,6 @@ bool ReadWriteServer::isPrepared()
 {
   bool res = true;
 
-  // Example checking a token:
-  // CHECK_TOKEN(w_somedata);
-
-  // Example checking anything
-  // CHECK_CONDITION(myfile.good());
-  // CHECK_CONDITION2(sometest, "some test failed");
-
   // return result of checks
   return res;
 }
@@ -193,47 +210,10 @@ void ReadWriteServer::stopModule(const TimeSpec &time)
   do_calc.switchOff(time);
 }
 
-// fill a snapshot with state data. You may remove this method (and the
-// declaration) if you specified to the SimulationModule that the size of
-// state snapshots is zero
-void ReadWriteServer::fillSnapshot(const TimeSpec& ts,
-                              Snapshot& snap, bool from_trim)
-{
-  // The most efficient way of filling a snapshot is with an AmorphStore
-  // object.
-  AmorphStore s(snap.accessData(), snap.getDataSize());
-
-  if (from_trim) {
-    // use packData(s, trim_state_variable1); ... to pack your state into
-    // the snapshot
-  }
-  else {
-    // this is a snapshot from the running simulation. Dusime takes care
-    // that no other snapshot is taken at the same time, so you can safely
-    // pack the data you copied into (or left into) the snapshot state
-    // variables in here
-    // use packData(s, snapshot_state_variable1); ...
-  }
-}
-
-// reload from a snapshot. You may remove this method (and the
-// declaration) if you specified to the SimulationModule that the size of
-// state snapshots is zero
-void ReadWriteServer::loadSnapshot(const TimeSpec& t, const Snapshot& snap)
-{
-  // access the data in the snapshot with an AmorphReStore object
-  AmorphReStore s(snap.data, snap.getDataSize());
-
-  // use unPackData(s, real_state_variable1 ); ... to unpack the data
-  // from the snapshot.
-  // You can safely do this, while snapshot loading is going on the
-  // simulation is in HoldCurrent or the activity is stopped.
-}
-
 // this routine contains the main simulation process of your module. You
 // should read the input channels here, and calculate and write the
 // appropriate output
-void ReadWriteServer::doCalculation(const TimeSpec& ts)
+void ReadWriteServer::doCalculation(const TimeSpec &ts)
 {
   // check the state we are supposed to be in
   switch (getAndCheckState(ts)) {
@@ -241,109 +221,115 @@ void ReadWriteServer::doCalculation(const TimeSpec& ts)
     // only repeat the output, do not change the model state
 
     break;
-    }
+  }
 
   case SimulationState::Replay:
   case SimulationState::Advance: {
-    // access the input
-    // example:
-    // try {
-    //   DataReader<MyInput> u(input_token, ts);
-    //   throttle = u.data().throttle;
-    //   de = u.data().de; ....
-    // }
-    // catch(Exception& e) {
-    //   // strange, there is no input. Should I try to continue or not?
-    // }
-    /* The above piece of code shows a block in which you try to catch
-       error conditions (exceptions) to handle the case in which the input
-       data is lost. This is not always necessary, if you normally do not
-       foresee such a condition, and you don t mind being stopped when
-       it happens, forget about the try/catch blocks. */
 
-    // do the simulation calculations, one step
+    for (auto &client : clients) {
+      if (client.process(ts)) {
+        // whatever
+      }
+    }
 
     break;
-    }
+  }
   default:
     // other states should never be entered for a SimulationModule,
     // HardwareModules on the other hand have more states. Throw an
     // exception if we get here,
-    throw CannotHandleState(getId(),GlobalId(), "state unhandled");
+    throw CannotHandleState(getId(), GlobalId(), "state unhandled");
   }
 
-  // DUECA applications are data-driven. From the time a module is switched
-  // on, it should produce data, so that modules "downstreams" are
-  // activated
-  // access your output channel(s)
-  // example
-  // DataWriter<MyOutput> y(output_token, ts);
-
-  // write the output into the output channel, using the stream writer
-  // y.data().var1 = something; ...
-
-  if (snapshotNow()) {
-    // keep a copy of the model state. Snapshot sending is done in the
-    // sendSnapshot routine, later, and possibly at lower priority
-    // e.g.
-    // snapshot_state_variable1 = state_variable1; ...
-    // (or maybe if your state is very large, there is a cleverer way ...)
+  // check up on entries
+  ChannelEntryInfo ei;
+  while (watcher->checkChange(ei)) {
+    if (ei.created) {
+      // create a matching processor
+      clients.emplace_back(getId(), ncycles, readchannel_name,
+                           writechannel_name, ei.entry_id, ei.entry_label);
+      totalclients++;
+    }
+    else {
+      // remove and check
+      auto cl =
+        std::find_if(clients.begin(), clients.end(), [ei](const CommClient &c) {
+          return c.label == ei.entry_label;
+        });
+      if (cl == clients.end()) {
+        E_MOD("Cannot find client handler for " << ei.entry_label);
+      }
+      else {
+        if (cl->phase != CommClient::Closing) {
+          E_MOD("Client not properly closed for " << ei.entry_label);
+        }
+        else {
+          clients.erase(cl);
+        }
+      }
+    }
   }
 }
 
-void ReadWriteServer::trimCalculation(const TimeSpec& ts, const TrimMode& mode)
+ReadWriteServer::CommClient::CommClient(const GlobalId &master_id, int ncycles,
+                                        const std::string &rchannelname,
+                                        const std::string &wchannelname,
+                                        unsigned entry_id,
+                                        const std::string &label) :
+  phase(CheckTokens),
+  counter(ncycles),
+  r_token(master_id, NameSet(rchannelname), getclassname<SimpleCounter>(),
+          entry_id, Channel::Events, Channel::OneOrMoreEntries),
+  w_token(new ChannelWriteToken(master_id, wchannelname,
+                                getclassname<SimpleCounter>(), label,
+                                Channel::Events, Channel::OneOrMoreEntries)),
+  label(label)
+{}
+
+bool ReadWriteServer::CommClient::process(const DataTimeSpec &ts)
 {
-  // read the event equivalent of the input data
-  // example
-  // DataReader<MyData> u(i_input_token, ts);
+  switch (phase) {
 
-  // using the input, and the data put into your trim variables,
-  // calculate the derivative of the state. DO NOT use the state
-  // vector of the normal simulation here, because it might be that
-  // this is done while the simulation runs!
-  // Some elements in this state derivative are needed as target, copy
-  // these out again into trim variables (see you TrimTable
+  case CheckTokens:
+    if (r_token.isValid() && w_token->isValid()) {
+      phase = Counting;
+    }
+    break;
 
-  // trim calculation
-  switch(mode) {
-  case FlightPath: {
-    // one type of trim calculation, find a power setting and attitude
-    // belonging to a flight path angle and speed
+  case Counting:
+    if (counter) {
+      counter--;
+      DataWriter<SimpleCounter> cnt(*w_token, ts);
+      cnt.data().count = counter;
+      phase = WaitResponse;
+    }
+    else {
+      w_token.reset();
+      phase = Closing;
+    }
+    break;
+
+  case WaitResponse:
+    if (r_token.haveVisibleSets(ts)) {
+      DataReader<SimpleCounter> cnt(r_token, ts);
+      if (cnt.data().count != counter) {
+        W_MOD("Unexpected data read back from client at '"
+              << label << "', expecting " << counter << " received "
+              << cnt.data().count);
+      }
+      else {
+        phase = Counting;
+      }
+    }
+    break;
+
+  case Closing:
+    break;
   }
-  break;
-
-  case Speed: {
-    // find a flightpath belonging to a speed and power setting (also
-    // nice for gliders)
-  }
-  break;
-
-  case Ground: {
-    // find an altitude/attitude belonging to standing still on the
-    // ground, power/speed 0
-  }
-  break;
-
-  default:
-    W_MOD(getId() << " cannot calculate inco mode " << mode);
-  break;
-  }
-
-  // This works just like a normal calculation, only you provide the
-  // steady state value (if your system is stable anyhow). So, if you
-  // have other modules normally depending on your output, you should
-  // also produce the equivalent output here.
-  // DataWriter<MyOutput> y(output_token, ts);
-
-  // write the output into the output channel, using the DataWriter
-
-  // now return. The real results from the trim calculation, as you
-  // specified them in the TrimTable, will now be collected and sent
-  // off for processing.
+  return true;
 }
 
 // Make a TypeCreator object for this module, the TypeCreator
 // will check in with the scheme-interpreting code, and enable the
 // creation of modules of this type
 static TypeCreator<ReadWriteServer> a(ReadWriteServer::getMyParameterTable());
-

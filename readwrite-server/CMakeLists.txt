@@ -40,7 +40,7 @@ dueca_add_module(
   # INCLUDEDIRS_PUBLIC
 
   # optionally add more DUECA components (e.g., a graphics toolkit?)
-  DUECA_COMPONENTS
+  DUECA_COMPONENTS websock
 
   # if you directly use code from other modules here, specify these
   # in the form of project/module. Code generation order will be correct,
