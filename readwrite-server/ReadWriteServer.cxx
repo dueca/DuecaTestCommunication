@@ -144,8 +144,9 @@ ReadWriteServer::~ReadWriteServer()
 {
   if (totalclients) {
     if (clients.size()) {
-      for (const auto &c: clients) {
-        E_MOD("Remaining uncompleted client for " << c.label << " phase " << c.phase << " count " << c.counter);
+      for (const auto &c : clients) {
+        E_MOD("Remaining uncompleted client for "
+              << c.label << " phase " << c.phase << " count " << c.counter);
       }
       exit(1);
     }
@@ -292,8 +293,20 @@ bool ReadWriteServer::CommClient::process(const DataTimeSpec &ts)
 
   case CheckTokens:
     if (r_token.isValid() && w_token->isValid()) {
-      phase = Counting;
+      phase = Slack1;
     }
+    break;
+
+  case Slack1:
+    phase = Slack2;
+    break;
+
+  case Slack2:
+    phase = Slack3;
+    break;
+
+  case Slack3:
+    phase = Counting;
     break;
 
   case Counting:

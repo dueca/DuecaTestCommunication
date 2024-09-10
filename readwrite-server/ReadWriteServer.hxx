@@ -49,6 +49,9 @@ private: // simulation data
     /** State machine definition */
     enum Phase {
       CheckTokens,  ///< Check the read and write token
+      Slack1,
+      Slack2,
+      Slack3,
       Counting,     ///< Writing and checking responses
       WaitResponse, ///< Waiting for readback
       Closing       ///< Waiting for removal
