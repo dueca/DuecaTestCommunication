@@ -1,0 +1,16 @@
+# -*-bash-*-
+# this file creates all links to files in the data directory needed for
+# running the application on a specific machine.
+#
+# example
+# ln -sf $DATADIR/*.cnf .
+
+# folder with project-wide data
+DATADIR=../../run-data
+
+# create a folder for run log history
+if [ ! -d runlogs ]; then
+   mkdir runlogs
+fi
+
+ln -sf ../../../build/dueca_run.x .

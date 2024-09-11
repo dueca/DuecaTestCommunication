@@ -19,6 +19,7 @@
     <module>read-unified</module>
     <module>write-unified</module>
     <module>write-assorted</module>
+    <module>check-triggering</module>
     <module>readwrite-server</module>
   </project>
 </machine>
