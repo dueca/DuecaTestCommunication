@@ -19,6 +19,7 @@
 
 // include additional files needed for your calculation here
 #include <algorithm>
+#include <dueca/Environment.hxx>
 
 // the standard package for DUSIME, including template source
 #define DO_INSTANTIATE
@@ -148,7 +149,7 @@ ReadWriteServer::~ReadWriteServer()
         E_MOD("Remaining uncompleted client for "
               << c.label << " phase " << c.phase << " count " << c.counter);
       }
-      exit(1);
+      Environment::getInstance()->setExitCode(1);
     }
   }
   else {

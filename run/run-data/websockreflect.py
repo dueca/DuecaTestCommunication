@@ -53,6 +53,7 @@ async def configdata(decoder, port):
 
             # now the connection is here, run other jobs
             await readwrite(decoder, port, 'server')
+            await reflect(decoder, port, 'direct')
 
         except ConnectionRefusedError:
             print("No connection yet on", url)
@@ -87,6 +88,38 @@ async def readwrite(coder, port, endpoint):
                 res = await wsock.send(coder.dumps(data))
     except Exception as e:
         print(f"write-and-read {url}, exception {e}")
+
+async def reflect(coder, port, endpoint):
+    urlr = f'ws://127.0.0.1:{port}/read/{endpoint}'
+    urlw = f'ws://127.0.0.1:{port}/write/{endpoint}read'
+    firstmsg = True
+
+    try:
+
+        async with websockets.connect(urlr), websockets.connect(urlw) as \
+                    wsockr, wsockw:
+
+            # send config to write socket
+            conf = dict(dataclass="SimpleCounter", label="reflect")
+            await wsockw.send(coder.dumps(conf))
+
+            print("Established read connection to", urlr, urlw)
+
+            # get the first message
+            msg = await wsockr.recv()
+            conf = coder.loads(msg)
+            print("read setup", conf)
+
+            while True:
+
+                msg = await wsockr.recv()
+
+                data = coder.loads(msg)
+
+                print("Replying message", data)
+                res = await wsockw.send(coder.dumps(data))
+    except Exception as e:
+        print(f"reflect {urlw}, exception {e}")
 
 async def run_jobs():
     result = await asyncio.gather(

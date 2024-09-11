@@ -108,6 +108,14 @@ if this_node_id == ecs_node:
         )
     )
 
+    mymods.append(dueca.Module(
+        'ws-write-read', '', sim_priority).param(
+            set_timing = sim_timing,
+            check_timing = (2000, 8000),
+            ncycles = 10
+        )
+    )
+
     mymods.append(
         dueca.Module(
             "web-sockets-server", "", admin_priority).param(
@@ -116,7 +124,18 @@ if this_node_id == ecs_node:
                  ('port', 8001),
                  ('write-and-read', ("server",
                                      f"SimpleCounter://{entity_name}/upstream",
-                                     f"SimpleCounter://{entity_name}/downstream"))
+                                     f"SimpleCounter://{entity_name}/downstream")),
+                 ('read', ("direct",
+                           f"SimpleCounter://{entity_name}",
+                           "SimpleCounter")),
+                 ('current', ("direct",
+                              f"SimpleCounter://{entity_name}",
+                              "SimpleCounter")),
+                 ('write', ("directread",
+                            f"SimpleCounter://{entity_name}/read")),
+                 ('write', ("directfollow",
+                            f"SimpleCounter://{entity_name}/read",
+                            "SimpleCounter")),
             )
     )
     mymods.append(
@@ -127,7 +146,18 @@ if this_node_id == ecs_node:
                  ('port', 8002),
                  ('write-and-read', ("server",
                                      f"SimpleCounter://{entity_name}/upstream",
-                                     f"SimpleCounter://{entity_name}/downstream"))
+                                     f"SimpleCounter://{entity_name}/downstream")),
+                 ('read', ("direct",
+                           f"SimpleCounter://{entity_name}",
+                           "SimpleCounter")),
+                 ('current', ("direct",
+                              f"SimpleCounter://{entity_name}",
+                              "SimpleCounter")),
+                 ('write', ("read",
+                            f"SimpleCounter://{entity_name}/read")),
+                 ('write', ("follow",
+                            f"SimpleCounter://{entity_name}/read",
+                            "SimpleCounter")),
             )
     )
 

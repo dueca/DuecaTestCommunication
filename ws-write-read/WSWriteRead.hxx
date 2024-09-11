@@ -1,103 +1,75 @@
 /* ------------------------------------------------------------------   */
-/*      item            : ReadWriteServer.hxx
+/*      item            : WSWriteRead.hxx
         made by         : repa
         from template   : DusimeModuleTemplate.hxx (2022.06)
-        date            : Fri Sep  6 17:24:12 2024
+        date            : Wed Sep 11 04:26:52 2024
         category        : header file
         description     :
-        changes         : Fri Sep  6 17:24:12 2024 first version
+        changes         : Wed Sep 11 04:26:52 2024 first version
         language        : C++
         copyright       : (c)
 */
 
-#ifndef ReadWriteServer_hxx
-#define ReadWriteServer_hxx
+#ifndef WSWriteRead_hxx
+#define WSWriteRead_hxx
 
 // include the dusime header
-#include "DataTimeSpec.hxx"
-#include "GlobalId.hxx"
-#include <boost/smart_ptr/scoped_ptr.hpp>
-#include <dueca/ChannelWatcher.hxx>
+#include "ChannelReadToken.hxx"
 #include <dusime.h>
-#include <list>
-
 USING_DUECA_NS;
 
 // This includes headers for the objects that are sent over the channels
 #include "comm-objects.h"
 
 // include headers for functions/classes you need in the module
+#include <array>
 
-/** A module.
+/** Fixed pair of write channel and two read channels.
 
     The instructions to create an module of this class from the start
     script are:
 
-    \verbinclude read-write-server.scm
+    \verbinclude ws-write-read.scm
 */
-class ReadWriteServer : public SimulationModule
+class WSWriteRead : public SimulationModule
 {
   /** self-define the module type, to ease writing the parameter table */
-  typedef ReadWriteServer _ThisModule_;
+  typedef WSWriteRead _ThisModule_;
 
 private: // simulation data
-  // declare the data you need in your simulation
+  // current counter value
+  int count;
 
-  /** Communication client data */
-  struct CommClient
-  {
-    /** State machine definition */
-    enum Phase {
-      CheckTokens,  ///< Check the read and write token
-      Slack1,
-      Slack2,
-      Slack3,
-      Counting,     ///< Writing and checking responses
-      WaitResponse, ///< Waiting for readback
-      Closing       ///< Waiting for removal
-    };
+  // maximum slack in reply delay
+  int maxslack;
 
-    /** Current phase */
-    Phase phase;
+  // number of faults counted
+  int nfault;
 
-    /** Current value of this client's counter */
-    int counter;
+  /** Counters */
+  std::array<int,4> nreceived;
 
-    /** Read token on the communication channel */
-    ChannelReadToken r_token;
+private: // channel access
+  // declare access tokens for all the channels you read and write
 
-    /** Reply/ write token on the channel */
-    boost::scoped_ptr<ChannelWriteToken> w_token;
+  /// Feedback from a process following all written data
+  ChannelReadToken r_count1;
 
-    /** token label */
-    std::string label;
+  /** Feedback from a python process repeatedly checking up on data. May have
+      multiple repeated messages with same data
+   */
+  ChannelReadToken r_count2;
 
-    /** Constructor */
-    CommClient(const GlobalId &master_id, int ncycles, const std::string &rchannelname,
-               const std::string &wchannelname, unsigned entry_id,
-               const std::string &label);
+   /// Feedback from a process following all written data
+  ChannelReadToken r_count1p;
 
-    /** Action, check up on responses, and send data to the client */
-    bool process(const DataTimeSpec &ts);
-  };
+  /** Feedback from a python process repeatedly checking up on data. May have
+      multiple repeated messages with same data
+   */
+  ChannelReadToken r_count2p;
 
-  /** List of clients */
-  std::list<CommClient> clients;
-
-  /** Channel to watch */
-  std::string readchannel_name;
-
-  /** Channel to write to */
-  std::string writechannel_name;
-
-  /** Number of cycles */
-  int ncycles;
-
-  /** Monitor the read channel */
-  boost::scoped_ptr<ChannelWatcher> watcher;
-
-  /** Total number of clients processed */
-  unsigned totalclients;
+  /** Write data */
+  ChannelWriteToken w_count;
 
 private: // activity allocation
   /** You might also need a clock. Don't mis-use this, because it is
@@ -105,7 +77,7 @@ private: // activity allocation
   PeriodicAlarm myclock;
 
   /** Callback object for simulation calculation. */
-  Callback<ReadWriteServer> cb1;
+  Callback<WSWriteRead> cb1;
 
   /** Activity for simulation calculation. */
   ActivityCallback do_calc;
@@ -122,7 +94,7 @@ public: // class name and trim/parameter tables
 
 public: // construction and further specification
   /** Constructor. Is normally called from the creation script. */
-  ReadWriteServer(Entity *e, const char *part, const PrioritySpec &ts);
+  WSWriteRead(Entity *e, const char *part, const PrioritySpec &ts);
 
   /** Continued construction. This is called after all script
       parameters have been read and filled in, according to the
@@ -134,7 +106,7 @@ public: // construction and further specification
   bool complete();
 
   /** Destructor. */
-  ~ReadWriteServer();
+  ~WSWriteRead();
 
   // add here the member functions you want to be called with further
   // parameters. These are then also added in the parameter table
