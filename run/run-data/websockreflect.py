@@ -70,10 +70,10 @@ async def readwrite(coder, port, endpoint):
             print("Established write-and-read connection to", url)
 
             # write the requested data communication
-            conf = dict(dataclass="SimpleCounter")
+            conf = dict(dataclass="SimpleCounter", label=f"follow{port}")
             await wsock.send(coder.dumps(conf))
 
-            # get the first message
+            # get the first message with setup/confirmation
             msg = await wsock.recv()
             conf = coder.loads(msg)
             print("write-and-read setup", conf)
@@ -96,34 +96,40 @@ async def reflect(coder, port, endpoint):
 
     try:
 
-        async with websockets.connect(urlr), websockets.connect(urlw) as \
-                    wsockr, wsockw:
+        async with websockets.connect(urlr) as wsockr:
 
-            # send config to write socket
-            conf = dict(dataclass="SimpleCounter", label="reflect")
-            await wsockw.send(coder.dumps(conf))
+            async with websockets.connect(urlw) as wsockw:
 
-            print("Established read connection to", urlr, urlw)
+                # send config to write socket
+                conf = dict(dataclass="SimpleCounter", label="reflect")
+                await wsockw.send(coder.dumps(conf))
 
-            # get the first message
-            msg = await wsockr.recv()
-            conf = coder.loads(msg)
-            print("read setup", conf)
+                print("Established read connection to", urlr, urlw)
 
-            while True:
-
+                # get the first message
                 msg = await wsockr.recv()
+                conf = coder.loads(msg)
+                print("read setup", conf)
 
-                data = coder.loads(msg)
+                msg = await wsockw.recv()
+                conf = coder.loads(msg)
+                print("write setup", conf)
 
-                print("Replying message", data)
-                res = await wsockw.send(coder.dumps(data))
+                while True:
+
+                    msg = await wsockr.recv()
+
+                    data = coder.loads(msg)
+
+                    print("Replying message", data)
+                    res = await wsockw.send(coder.dumps(data))
     except Exception as e:
         print(f"reflect {urlw}, exception {e}")
 
 async def run_jobs():
     result = await asyncio.gather(
       configdata(json, 8001),
+
    #   configdata(msgpack, 8002),
       #readwrite(json, 8001, 'server'),
       #readwrite(msgpack, 8002, 'server')
