@@ -52,8 +52,14 @@ async def configdata(decoder, port):
                     print(f"Configuration, exception {e}")
 
             # now the connection is here, run other jobs
-            await readwrite(decoder, port, 'server')
-            await reflect(decoder, port, 'direct')
+            tasks = (
+                asyncio.create_task(readwrite(decoder, port, 'server')),
+                asyncio.create_task(reflect(decoder, port, 'direct')),
+                asyncio.create_task(checkup(decoder, port, 'direct'))
+            )
+            #await readwrite(decoder, port, 'server')
+            #await reflect(decoder, port, 'direct')
+            await asyncio.gather(*tasks)
 
         except ConnectionRefusedError:
             print("No connection yet on", url)
@@ -126,13 +132,54 @@ async def reflect(coder, port, endpoint):
     except Exception as e:
         print(f"reflect {urlw}, exception {e}")
 
+
+async def checkup(coder, port, endpoint):
+    urlr = f'ws://127.0.0.1:{port}/current/{endpoint}'
+    urlw = f'ws://127.0.0.1:{port}/write/{endpoint}current'
+    firstmsg = True
+
+    try:
+        async with websockets.connect(urlr) as wsockr:
+
+            async with websockets.connect(urlw) as wsockw:
+
+                # send config to write socket
+                conf = dict(dataclass="SimpleCounter", label="reflect")
+                await wsockw.send(coder.dumps(conf))
+
+                print("Established read connection to", urlr, urlw)
+
+                # get the first message
+                msg = await wsockr.recv()
+                conf = coder.loads(msg)
+                print("read setup", conf)
+
+                msg = await wsockw.recv()
+                conf = coder.loads(msg)
+                print("write setup", conf)
+
+                _olddata = {}
+                while True:
+
+                    await asyncio.timeout(0.1)
+                    await sworkr.send(coder.dumps({}))
+                    msg = await wsockr.recv()
+
+                    data = coder.loads(msg)
+
+                    if olddata != data:
+                        print("New message", data)
+                        olddata = data
+                        res = await wsockw.send(coder.dumps(data))
+
+    except Exception as e:
+        print(f"checup {urlw}, exception {e}")
+
+
 async def run_jobs():
     result = await asyncio.gather(
-      configdata(json, 8001),
-
-   #   configdata(msgpack, 8002),
-      #readwrite(json, 8001, 'server'),
-      #readwrite(msgpack, 8002, 'server')
+        configdata(json, 8001),
+        configdata(msgpack, 8002)
     )
 
 
