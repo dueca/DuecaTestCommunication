@@ -10,6 +10,7 @@
         copyright       : (c)
 */
 
+#include "CommObjectTraits.hxx"
 #include "DataReader.hxx"
 #include "DataWriter.hxx"
 #include "SimpleCounter.hxx"
@@ -32,7 +33,6 @@
 
 // class/module name
 const char *const WSWriteRead::classname = "ws-write-read";
-
 
 // parameters to be inserted
 const ParameterTable *WSWriteRead::getMyParameterTable()
@@ -83,20 +83,28 @@ WSWriteRead::WSWriteRead(Entity *e, const char *part, const PrioritySpec &ps) :
   count(10),
   maxslack(1),
   nfault(0),
-  nreceived({{0,0,0,0}}),
+  nreceived({ { 0, 0, 0, 0, 0, 0 } }),
 
   // initialize the channel access tokens, check the documentation for the
   // various parameters. Some examples:
-  r_count1(getId(), NameSet(getEntity(), getclassname<SimpleCounter>(), "read"),
+  r_count1(getId(),
+           NameSet(getEntity(), getclassname<SimpleCounter>(), "from_read"),
            getclassname<SimpleCounter>(), 0, Channel::Events),
   r_count2(getId(),
-           NameSet(getEntity(), getclassname<SimpleCounter>(), "follow"),
+           NameSet(getEntity(), getclassname<SimpleCounter>(), "from_current"),
            getclassname<SimpleCounter>(), 0, Channel::Events),
-  r_count1p(getId(), NameSet(getEntity(), getclassname<SimpleCounter>(), "readp"),
-           getclassname<SimpleCounter>(), 0, Channel::Events),
+  r_count1p(getId(),
+            NameSet(getEntity(), getclassname<SimpleCounter>(), "from_read"),
+            getclassname<SimpleCounter>(), 1, Channel::Events),
   r_count2p(getId(),
-           NameSet(getEntity(), getclassname<SimpleCounter>(), "followp"),
-           getclassname<SimpleCounter>(), 0, Channel::Events),
+            NameSet(getEntity(), getclassname<SimpleCounter>(), "from_current"),
+            getclassname<SimpleCounter>(), 1, Channel::Events),
+  r_preset1(getId(),
+            NameSet(getEntity(), getclassname<SimpleCounter>(), "preset1"),
+            getclassname<SimpleCounter>(), 0, Channel::Events),
+  r_preset2(getId(),
+            NameSet(getEntity(), getclassname<SimpleCounter>(), "preset2"),
+            getclassname<SimpleCounter>(), 0, Channel::Events),
   w_count(getId(), NameSet(getEntity(), getclassname<SimpleCounter>(), ""),
           getclassname<SimpleCounter>(), "", Channel::Events),
 
@@ -166,6 +174,8 @@ bool WSWriteRead::isPrepared()
   CHECK_TOKEN(r_count2p);
 #endif
   CHECK_TOKEN(w_count);
+  CHECK_TOKEN(r_preset1);
+  CHECK_TOKEN(r_preset2);
 
   // return result of checks
   return res;
@@ -195,8 +205,8 @@ void WSWriteRead::doCalculation(const TimeSpec &ts)
 
   if (r_count2.isValid() && r_count2.haveVisibleSets(ts)) {
     DataReader<SimpleCounter> sc(r_count2, ts);
-     nreceived[1]++;
-   if (sc.data().count > count + maxslack) {
+    nreceived[1]++;
+    if (sc.data().count > count + maxslack) {
       W_MOD("WSWriteRead check 2, got " << sc.data().count << " while at "
                                         << count);
       nfault++;
@@ -208,7 +218,7 @@ void WSWriteRead::doCalculation(const TimeSpec &ts)
     nreceived[2]++;
     if (sc.data().count > count + maxslack) {
       W_MOD("WSWriteRead check 1p, got " << sc.data().count << " while at "
-                                        << count);
+                                         << count);
       nfault++;
     }
   }
@@ -218,10 +228,32 @@ void WSWriteRead::doCalculation(const TimeSpec &ts)
     nreceived[3]++;
     if (sc.data().count > count + maxslack) {
       W_MOD("WSWriteRead check 2p, got " << sc.data().count << " while at "
-                                        << count);
+                                         << count);
       nfault++;
     }
   }
+
+  if (r_preset1.haveVisibleSets(ts)) {
+    DataReader<SimpleCounter> sc(r_preset1, ts);
+    nreceived[4]++;
+    if (sc.data().count > count + maxslack) {
+      W_MOD("WSWriteRead check preset1, got " << sc.data().count << " while at "
+                                              << count);
+      nfault++;
+    }
+  }
+
+  if (r_preset2.haveVisibleSets(ts)) {
+    DataReader<SimpleCounter> sc(r_preset2, ts);
+    nreceived[5]++;
+    if (sc.data().count > count + maxslack) {
+      W_MOD("WSWriteRead check preset1, got " << sc.data().count << " while at "
+                                              << count);
+      nfault++;
+    }
+  }
+
+
 
   // check the state we are supposed to be in
   switch (getAndCheckState(ts)) {

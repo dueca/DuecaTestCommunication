@@ -132,10 +132,14 @@ if this_node_id == ecs_node:
                               f"SimpleCounter://{entity_name}",
                               "SimpleCounter")),
                  ('write', ("directread",
-                            f"SimpleCounter://{entity_name}/read")),
-                 ('write', ("directfollow",
-                            f"SimpleCounter://{entity_name}/read",
+                            f"SimpleCounter://{entity_name}/from_read")),
+                 ('write', ("directcurrent",
+                            f"SimpleCounter://{entity_name}/from_current",
                             "SimpleCounter")),
+                 ('write-preset', ("directpreset",
+                             f"SimpleCounter://{entity_name}/preset1",
+                             "SimpleCounter", "json")),
+                 ('info', ("direct", f"SimpleCounter://{entity_name}"))
             )
     )
     mymods.append(
@@ -153,11 +157,15 @@ if this_node_id == ecs_node:
                  ('current', ("direct",
                               f"SimpleCounter://{entity_name}",
                               "SimpleCounter")),
-                 ('write', ("read",
-                            f"SimpleCounter://{entity_name}/read")),
-                 ('write', ("follow",
-                            f"SimpleCounter://{entity_name}/read",
+                 ('write', ("directread",
+                            f"SimpleCounter://{entity_name}/from_read")),
+                 ('write', ("directcurrent",
+                            f"SimpleCounter://{entity_name}/from_current",
                             "SimpleCounter")),
+                 ('write-preset', ("directpreset",
+                             f"SimpleCounter://{entity_name}/preset2",
+                             "SimpleCounter", "msgpack")),
+                 ('info', ("direct", f"SimpleCounter://{entity_name}"))
             )
     )
 

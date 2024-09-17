@@ -47,7 +47,7 @@ private: // simulation data
   int nfault;
 
   /** Counters */
-  std::array<int,4> nreceived;
+  std::array<int,6> nreceived;
 
 private: // channel access
   // declare access tokens for all the channels you read and write
@@ -67,6 +67,12 @@ private: // channel access
       multiple repeated messages with same data
    */
   ChannelReadToken r_count2p;
+
+  /** Feedback from the preset write channel */
+  ChannelReadToken r_preset1;
+
+  /** Feedback from the preset write channel */
+  ChannelReadToken r_preset2;
 
   /** Write data */
   ChannelWriteToken w_count;
