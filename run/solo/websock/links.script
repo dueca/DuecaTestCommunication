@@ -14,11 +14,15 @@ if [ ! -d runlogs ]; then
 fi
 
 # convenience link to executable (cmake or legacy)
-if [ -d ../../../build ]; then
-   ln -sf ../../../build/dueca_run.x .
-else
-   ln -sf ../../../dueca_run.x .
-fi
+cat >dueca_run.x <<EOF
+#!/usr/bin/bash
+
+# websocket tester
+python3 websockreflect.py &
+
+../../../build/dueca_run.x
+EOF
+chmod +x dueca_run.x
 
 # active only on node 0, when a start file is found, link the start
 # file to a start script folder (default ${HOME}/scripts)
