@@ -1,0 +1,31 @@
+# -*-bash-*-
+# this file creates all links to files in the data directory needed for
+# running the application on a specific machine.
+
+# standard folder with project-wide data
+DATADIR=../../run-data
+
+# example for project-wide configuration (.cnf) files
+# ln -sf $DATADIR/*.cnf .
+
+# create a folder for run log history
+if [ ! -d runlogs ]; then
+   mkdir runlogs
+fi
+
+# convenience link to executable (cmake or legacy)
+cat >dueca_run.x <<EOF
+#!/usr/bin/bash
+
+# websocket tester
+python3 websockreflect.py &
+
+../../../build/dueca_run.x
+EOF
+chmod +x dueca_run.x
+
+# active only on node 0, when a start file is found, link the start
+# file to a start script folder (default ${HOME}/scripts)
+dueca-startlink --scriptdir=${HOME}/scripts
+
+ln -sf ${DATADIR}/websockreflect.py .

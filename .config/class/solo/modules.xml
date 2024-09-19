@@ -20,5 +20,7 @@
     <module>write-unified</module>
     <module>write-assorted</module>
     <module>check-triggering</module>
+    <module>readwrite-server</module>
+    <module>ws-write-read</module>
   </project>
 </machine>
