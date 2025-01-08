@@ -12,7 +12,7 @@ send_order = 0                         # order/prio in send cycle
 
 ### parameter defining real_time behaviour
 highest_manager = 4                    # max priority of activities
-run_in_multiple_threads = True         # test with False for threading problems
+run_in_multiple_threads = True #and False        # test with False for threading problems
 rt_sync_mode = 2                       # 0=sigwait, obsolete
                                        # 1=select, portable, obsolete
                                        # 2=nanosleep, good for all modern
@@ -206,4 +206,3 @@ elif use_ip_comm and send_order != 0:
 ###      give these the opportunity to do additional initialisation
 ###      Then it creates the EntityManager for this node, and the
 ###      configuration continues with dueca_mod.py
-

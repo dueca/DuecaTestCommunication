@@ -14,4 +14,4 @@ typedef dueca::varvector<uint32_t> vvector;")
        (Option hdf5)
        (Option msgpack)
        ;; map with items
-       (vvector nums (DefaultSize 0)))
+       (vvector nums (Default 0) (DefaultSize 0)))
