@@ -15,4 +15,5 @@ typedef dueca::fixvector<4,uint32_t> fvector;")
        (Option hdf5)
        (Option msgpack)
        ;; map with items
-       (fvector nums))
+       (fvector nums (Default 0))
+       )
