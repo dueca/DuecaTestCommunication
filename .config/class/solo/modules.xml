@@ -22,5 +22,6 @@
     <module>check-triggering</module>
     <module>readwrite-server</module>
     <module>ws-write-read</module>
+    <module>inter-monitor</module>
   </project>
 </machine>

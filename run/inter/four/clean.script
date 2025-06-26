@@ -1,0 +1,17 @@
+# -*-sh-*-
+# this file cleans all temporary run files and also the symbolic links
+# from the data directory
+
+# clean dueca stuff
+clean-dueca-rundir
+
+# clean symbolic links
+find . -type l -exec rm {} \;
+
+# run script, if desired
+RUNSCRIPT=0
+if [ $RUNSCRIPT = "1" ]; then
+    rm -f runscript
+fi
+
+# clean the user's stuff (that's you, you have to add your commands here!)
