@@ -64,7 +64,7 @@ if this_node_id == ecs_node:
     DUECA_mods = []
     DUECA_mods.append(dueca.Module("dusime", "", admin_priority))
     DUECA_mods.append(dueca.Module("dueca-view", "", admin_priority).param(
-        position_size=(560,460),
+        position_size=(560,360),
         glade_file="dusime.ui"
     ))
     DUECA_mods.append(dueca.Module("activity-view", "", admin_priority))
