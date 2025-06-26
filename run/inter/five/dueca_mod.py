@@ -54,7 +54,7 @@ log_timing = dueca.TimeSpec(0, 400)
 
 ## the name for the main entity to create. Note that you can create as
 ## many entities as you want, usually one is enough. Adjust as appropriate
-entity_name = "four"
+entity_name = "five"
 
 ## ---------------------------------------------------------------------
 ### the modules needed for dueca itself
@@ -64,7 +64,7 @@ if this_node_id == ecs_node:
     DUECA_mods = []
     DUECA_mods.append(dueca.Module("dusime", "", admin_priority))
     DUECA_mods.append(dueca.Module("dueca-view", "", admin_priority).param(
-        position_size=(1120,0)
+        position_size=(1120,460)
     ))
     DUECA_mods.append(dueca.Module("activity-view", "", admin_priority))
     DUECA_mods.append(dueca.Module("timing-view", "", admin_priority))

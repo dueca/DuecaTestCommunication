@@ -1,0 +1,41 @@
+# -*-sh-*-
+# this file creates all links to files in the data directory needed for
+# running the application on a specific machine.
+
+# standard folder with project-wide data
+DATADIR=../../run-data
+
+# example for project-wide configuration (.cnf) files
+# ln -sf $DATADIR/*.cnf .
+
+# create a folder for run log history
+if [ ! -d runlogs ]; then
+   mkdir runlogs
+fi
+
+# convenience link to executable (cmake or legacy)
+if [ -d ../../../build ]; then
+   ln -sf ../../../build/dueca_run.x .
+else
+   ln -sf ../../../dueca_run.x .
+fi
+
+# create a run script, if desired set to 1
+RUNSCRIPT=1
+
+# files you want kept with the run results, e.g. logs
+MOVEFILES="*.ddff *.toml"
+# files you want copies with the run results, e.g. config file
+COPYFILES="dueca_mod.py"
+if [ \! -x runscript -a ${RUNSCRIPT} = "1" ]; then
+    cat >runscript <<EOF
+#!/usr/bin/bash
+dueca-archivelogfiles "$MOVEFILES" "$COPYFILES"
+./dueca_run.x  > >(tee normal.log) 2> >(tee error.log >&2)
+EOF
+    chmod +x runscript
+fi
+
+# active only on node 0, when a start file is found, link the start
+# file to a start script folder (default ${HOME}/scripts)
+dueca-startlink --scriptdir=${HOME}/scripts

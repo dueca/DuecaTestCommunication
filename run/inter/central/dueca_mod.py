@@ -63,7 +63,9 @@ if this_node_id == ecs_node:
     # create a list of modules:
     DUECA_mods = []
     DUECA_mods.append(dueca.Module("dusime", "", admin_priority))
-    DUECA_mods.append(dueca.Module("dueca-view", "", admin_priority))
+    DUECA_mods.append(dueca.Module("dueca-view", "", admin_priority).param(
+        position_size=(0,10)
+    ))
     DUECA_mods.append(dueca.Module("activity-view", "", admin_priority))
     DUECA_mods.append(dueca.Module("timing-view", "", admin_priority))
     DUECA_mods.append(dueca.Module("log-view", "", admin_priority))
