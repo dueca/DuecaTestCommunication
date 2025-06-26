@@ -9,7 +9,7 @@ clean-dueca-rundir
 find . -type l -exec rm {} \;
 
 # run script, if desired
-RUNSCRIPT=0
+RUNSCRIPT=1
 if [ $RUNSCRIPT = "1" ]; then
     rm -f runscript
 fi

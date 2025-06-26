@@ -21,10 +21,10 @@ else
 fi
 
 # create a run script, if desired set to 1
-RUNSCRIPT=0
+RUNSCRIPT=1
 
 # files you want kept with the run results, e.g. logs
-MOVEFILES=""
+MOVEFILES="*.ddff *.toml"
 # files you want copies with the run results, e.g. config file
 COPYFILES="dueca_mod.py"
 if [ \! -x runscript -a ${RUNSCRIPT} = "1" ]; then

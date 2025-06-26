@@ -107,7 +107,8 @@ if this_node_id == ecs_node:
     )
 
     mymods.append(dueca.Module(
-        'read-unified', '', sim_priority)
+        'read-unified', '', sim_priority).param(
+            set_timing=sim_timing)
     )
 
     # placeholder when no modules are defined, remove if desired
