@@ -5,4 +5,10 @@
   <!-- default development set-up -->
   <node name="solo" machineclass="solo" sparse-checkout="false"/>
   <node name="websock" machineclass="solo" sparse-checkout="true"/>
+  <node name="central" machineclass="solo" sparse-checkout="true"/>
+  <node name="one" machineclass="solo" sparse-checkout="true"/>
+  <node name="two" machineclass="solo" sparse-checkout="true"/>
+  <node name="three" machineclass="solo" sparse-checkout="true"/>
+  <node name="four" machineclass="solo" sparse-checkout="true"/>
+  <node name="five" machineclass="solo" sparse-checkout="true"/>
 </nodes>

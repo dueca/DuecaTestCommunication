@@ -17,7 +17,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(SCRIPTLANG python)
 
 # selection of dueca components common to all machines in this project
-set(DUECA_COMPONENTS ${SCRIPTLANG} extra dusime udp hdf5 ddff)
+set(DUECA_COMPONENTS ${SCRIPTLANG} extra dusime udp hdf5 ddff inter)
 
 # find DUECA, activate specific functions
 find_package(DUECA)
