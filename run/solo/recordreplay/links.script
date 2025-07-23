@@ -5,8 +5,11 @@
 # example
 # ln -sf $DATADIR/*.cnf .
 
-# folder with project-wide data
-DATADIR=../../run-data
+# standard folder with project-wide data
+DATADIR=$(realpath ../../run-data)
+
+# python helper script
+ln -sf $DATADIR/which_dueca_gtk.py .
 
 # create a folder for run log history
 if [ ! -d runlogs ]; then

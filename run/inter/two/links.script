@@ -3,7 +3,10 @@
 # running the application on a specific machine.
 
 # standard folder with project-wide data
-DATADIR=../../run-data
+DATADIR=$(realpath ../../run-data)
+
+# python helper script
+ln -sf $DATADIR/which_dueca_gtk.py .
 
 # example for project-wide configuration (.cnf) files
 # ln -sf $DATADIR/*.cnf .
