@@ -33,7 +33,7 @@ print("Graphic interface detected as", graphic_interface)
 ### tick_time_step/tick_base_increment should be the same
 tick_base_increment = 100              # logical increment of time, each tick
 tick_compatible_increment = 100        # same, but used at start_up
-tick_time_step = 0.01                  # time step for each tick
+tick_time_step = 0.1                  # time step for each tick
 communication_interval = 50           # interval for initiating comm
 
 ### parameter for communication using multicast
