@@ -17,15 +17,36 @@ if [ ! -d runlogs ]; then
 fi
 
 # convenience link to executable (cmake or legacy)
-cat >dueca_run.x <<EOF
+if [ -d ../../../build ]; then
+   ln -sf ../../../build/dueca_run.x .
+else
+   ln -sf ../../../dueca_run.x .
+fi
+
+# create a run script, if desired set to 1
+RUNSCRIPT=1
+
+# files you want kept with the run results, e.g. logs
+MOVEFILES="recording*.ddff initial*.toml"
+# files you want copies with the run results, e.g. config file
+COPYFILES="dueca_mod.py"
+
+# create the runscript if it does not yet exist
+if [ \! -x runscript -a ${RUNSCRIPT} = "1" ]; then
+    cat >runscript <<EOF
 #!/usr/bin/bash
 
-# websocket tester
+# Store the previous run's files
+dueca-archivelogfiles "$MOVEFILES" "$COPYFILES"
+
+# start websocket tester program
 python3 websockreflect.py &
 
-../../../build/dueca_run.x
+# start the DUECA executable
+./dueca_run.x  > >(tee normal.log) 2> >(tee error.log >&2)
 EOF
-chmod +x dueca_run.x
+    chmod +x runscript
+fi
 
 # active only on node 0, when a start file is found, link the start
 # file to a start script folder (default ${HOME}/scripts)
