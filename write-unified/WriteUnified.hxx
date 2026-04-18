@@ -50,6 +50,9 @@ private: // simulation data
     /** event type or not */
     bool evtype;
 
+    /** replay through channel or manual */
+    bool channelreplay;
+
     /** Pointer to an access token. */
     ChannelWriteToken token;
 
@@ -58,7 +61,7 @@ private: // simulation data
 
     // constructor
     NormalBlipSpec(const WriteUnified& host, const MyBlip& b,
-                   bool evtype = false);
+                   bool evtype = false, bool channelreplay = false);
 
     // access to the token.
     inline ChannelWriteToken& getToken() {return token;}

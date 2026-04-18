@@ -107,10 +107,10 @@ if this_node_id == ecs_node:
                 place_blip=[20.0, 20.0, -0.1, -0.1, ]).param(
 
                 add_blip="second blip",
-                place_blip=[2, 2]).param(
+                place_blip=[2, 2])) #.param(
 
-                add_flasher_blip="flashing",
-                place_flasher_blip=[300, 0.4, 4.0]))
+               # add_flasher_blip="flashing",
+               # place_flasher_blip=[300, 0.4, 4.0]))
 
     mymods.append(
         dueca.Module(
