@@ -39,16 +39,16 @@ const char *const WriteUnified::classname = "write-unified";
 const IncoTable *WriteUnified::getMyIncoTable()
 {
   static IncoTable inco_table[] = {
-    // enter pairs of IncoVariable and VarProbe pointers (i.e.
-    // objects made with new), in this table.
-    // For example
-//    {(new IncoVariable("example", 0.0, 1.0, 0.01))
-//     ->forMode(FlightPath, Constraint)
-//     ->forMode(Speed, Control),
-//     new VarProbe<WriteUnified,double>
-//       (REF_MEMBER(&WriteUnified::i_example))}
+      // enter pairs of IncoVariable and VarProbe pointers (i.e.
+      // objects made with new), in this table.
+      // For example
+      //    {(new IncoVariable("example", 0.0, 1.0, 0.01))
+      //     ->forMode(FlightPath, Constraint)
+      //     ->forMode(Speed, Control),
+      //     new VarProbe<WriteUnified,double>
+      //       (REF_MEMBER(&WriteUnified::i_example))}
 
-    // always close off with:
+      // always close off with:
     { NULL, NULL }
   };
 
@@ -87,17 +87,17 @@ const ParameterTable *WriteUnified::getMyParameterTable()
         &WriteUnified::placeFlasherBlip),
       "put the newly added blip in its place" },
 
-    /* You can extend this table with labels and MemberCall or
-       VarProbe pointers to perform calls or insert values into your
-       class objects. Please also add a description (c-style string).
+      /* You can extend this table with labels and MemberCall or
+   VarProbe pointers to perform calls or insert values into your
+   class objects. Please also add a description (c-style string).
 
-       Note that for efficiency, set_timing_description and
-       check_timing_description are pointers to pre-defined strings,
-       you can simply enter the descriptive strings in the table. */
+   Note that for efficiency, set_timing_description and
+   check_timing_description are pointers to pre-defined strings,
+   you can simply enter the descriptive strings in the table. */
 
-    /* The table is closed off with NULL pointers for the variable
-       name and MemberCall/VarProbe object. The description is used to
-       give an overall description of the module. */
+      /* The table is closed off with NULL pointers for the variable
+   name and MemberCall/VarProbe object. The description is used to
+   give an overall description of the module. */
     { NULL, NULL,
       "This is a testing module for the UnifiedChannel facility."
       "It creates blips, and moves these with a random walk process." }
@@ -170,15 +170,7 @@ void WriteUnified::FlasherBlipSpec::setPeriod(unsigned int period)
 // constructor
 WriteUnified::WriteUnified(Entity *e, const char *part,
                            const PrioritySpec &ps) :
-  /* The following line initialises the SimulationModule base class.
-     You always pass the pointer to the entity, give the classname and the
-     part arguments.
-     If you give a NULL pointer instead of the inco table, you will not be
-     called for trim condition calculations, which is normal if you for
-     example implement logging or a display.
-     If you give 0 for the snapshot state, you will not be called to
-     fill a snapshot, or to restore your state from a snapshot. Only
-     applicable if you have no state. */
+
   SimulationModule(e, classname, part, getMyIncoTable(), 1),
 
   // initialize the data you need in your simulation
@@ -188,6 +180,7 @@ WriteUnified::WriteUnified(Entity *e, const char *part,
   // initialize the channel access tokens
   // example
   // my_token(getId(), NameSet(getEntity(), "MyData", part)),
+  check_phase(Other),
 
   // activity initialization
   cb1(this, &WriteUnified::doCalculation),
@@ -464,6 +457,24 @@ void WriteUnified::doCalculation(const TimeSpec &ts)
   case SimulationState::HoldCurrent: {
     // no updates
 
+    if (check_phase == InAdvance) {
+      // remember the state of things in advance
+      for (auto &blip : bliplist) {
+        blip.b_check = blip.b;
+      }
+      check_phase = Other;
+    }
+    if (check_phase == InReplay) {
+      // check and report on differences
+      for (auto &blip : bliplist) {
+        if (blip.b_check != blip.b) {
+          W_MOD("aftr=" << blip.b);
+          W_MOD("prev=" << blip.b_check);
+        }
+      }
+      check_phase = Other;
+    }
+
   } break;
 
   case SimulationState::Replay: {
@@ -482,6 +493,7 @@ void WriteUnified::doCalculation(const TimeSpec &ts)
         // later instead of the write
       }
     }
+    check_phase = InReplay;
   } break;
 
   case SimulationState::Advance: {
@@ -514,7 +526,7 @@ void WriteUnified::doCalculation(const TimeSpec &ts)
       ii->getBlip().x += ii->getBlip().dx * dt;
       ii->getBlip().y += ii->getBlip().dy * dt;
     }
-
+    check_phase = InAdvance;
   } break;
   default:
     // other states should never be entered for a SimulationModule,
