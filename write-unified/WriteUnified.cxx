@@ -11,8 +11,6 @@
         language        : C++
 */
 
-
-
 #define WriteUnified_cxx
 // include the definition of the module class
 #include "WriteUnified.hxx"
@@ -24,95 +22,92 @@
 #include <debug.h>
 
 // include additional files needed for your calculation here
-#include <randNormal.hxx>
-#include <CommObjectWriter.hxx>
 #include <CommObjectElementWriter.hxx>
+#include <CommObjectWriter.hxx>
 #include <boost/any.hpp>
 #include <dueca/DCOtoJSON.hxx>
 #include <dueca/JSONtoDCO.hxx>
+#include <randNormal.hxx>
 // the standard package for DUSIME, including template source
 #define DO_INSTANTIATE
 #include <dusime.h>
 
 // class/module name
-const char* const WriteUnified::classname = "write-unified";
+const char *const WriteUnified::classname = "write-unified";
 
 // initial condition/trim table
-const IncoTable* WriteUnified::getMyIncoTable()
+const IncoTable *WriteUnified::getMyIncoTable()
 {
   static IncoTable inco_table[] = {
-    // enter pairs of IncoVariable and VarProbe pointers (i.e.
-    // objects made with new), in this table.
-    // For example
-//    {(new IncoVariable("example", 0.0, 1.0, 0.01))
-//     ->forMode(FlightPath, Constraint)
-//     ->forMode(Speed, Control),
-//     new VarProbe<WriteUnified,double>
-//       (REF_MEMBER(&WriteUnified::i_example))}
+      // enter pairs of IncoVariable and VarProbe pointers (i.e.
+      // objects made with new), in this table.
+      // For example
+      //    {(new IncoVariable("example", 0.0, 1.0, 0.01))
+      //     ->forMode(FlightPath, Constraint)
+      //     ->forMode(Speed, Control),
+      //     new VarProbe<WriteUnified,double>
+      //       (REF_MEMBER(&WriteUnified::i_example))}
 
-    // always close off with:
-    { NULL, NULL} };
+      // always close off with:
+    { NULL, NULL }
+  };
 
   return inco_table;
 }
 
 // parameters to be inserted
-const ParameterTable* WriteUnified::getMyParameterTable()
+const ParameterTable *WriteUnified::getMyParameterTable()
 {
   static const ParameterTable parameter_table[] = {
     { "set-timing",
-      new MemberCall<WriteUnified,TimeSpec>
-        (&WriteUnified::setTimeSpec), set_timing_description },
+      new MemberCall<WriteUnified, TimeSpec>(&WriteUnified::setTimeSpec),
+      set_timing_description },
 
     { "check-timing",
-      new MemberCall<WriteUnified,vector<int> >
-      (&WriteUnified::checkTiming), check_timing_description },
+      new MemberCall<WriteUnified, vector<int>>(&WriteUnified::checkTiming),
+      check_timing_description },
 
-    { "add-blip",
-      new MemberCall<WriteUnified,vstring>
-      (&WriteUnified::addBlip),
+    { "add-blip", new MemberCall<WriteUnified, vstring>(&WriteUnified::addBlip),
       "add a new blip to the space of blips" },
 
     { "add-event-blip",
-      new MemberCall<WriteUnified,vstring>
-      (&WriteUnified::addEventBlip),
+      new MemberCall<WriteUnified, vstring>(&WriteUnified::addEventBlip),
       "add a new blip to the space of blips, event style" },
 
     { "add-flasher-blip",
-      new MemberCall<WriteUnified,vstring>
-      (&WriteUnified::addFlasherBlip),
+      new MemberCall<WriteUnified, vstring>(&WriteUnified::addFlasherBlip),
       "add a new on-and-off blip to the space of blips" },
 
     { "place-blip",
-      new MemberCall<WriteUnified,vector<float> >
-      (&WriteUnified::placeBlip),
+      new MemberCall<WriteUnified, vector<float>>(&WriteUnified::placeBlip),
       "put the newly added blip in its place" },
 
     { "place-flasher-blip",
-      new MemberCall<WriteUnified,vector<float> >
-      (&WriteUnified::placeFlasherBlip),
+      new MemberCall<WriteUnified, vector<float>>(
+        &WriteUnified::placeFlasherBlip),
       "put the newly added blip in its place" },
 
-    /* You can extend this table with labels and MemberCall or
-       VarProbe pointers to perform calls or insert values into your
-       class objects. Please also add a description (c-style string).
+      /* You can extend this table with labels and MemberCall or
+   VarProbe pointers to perform calls or insert values into your
+   class objects. Please also add a description (c-style string).
 
-       Note that for efficiency, set_timing_description and
-       check_timing_description are pointers to pre-defined strings,
-       you can simply enter the descriptive strings in the table. */
+   Note that for efficiency, set_timing_description and
+   check_timing_description are pointers to pre-defined strings,
+   you can simply enter the descriptive strings in the table. */
 
-    /* The table is closed off with NULL pointers for the variable
-       name and MemberCall/VarProbe object. The description is used to
-       give an overall description of the module. */
+      /* The table is closed off with NULL pointers for the variable
+   name and MemberCall/VarProbe object. The description is used to
+   give an overall description of the module. */
     { NULL, NULL,
       "This is a testing module for the UnifiedChannel facility."
-      "It creates blips, and moves these with a random walk process."} };
+      "It creates blips, and moves these with a random walk process." }
+  };
 
   return parameter_table;
 }
 
-WriteUnified::FlasherBlipSpec::FlasherBlipSpec(const WriteUnified& host,
-                                               const MyBlip& b) :
+WriteUnified::FlasherBlipSpec::FlasherBlipSpec(const WriteUnified &host,
+                                               const MyBlip &b) :
   AssociateObject<WriteUnified>(host),
   b(b),
   period(100),
@@ -125,13 +120,12 @@ WriteUnified::FlasherBlipSpec::FlasherBlipSpec(const WriteUnified& host,
 
 bool WriteUnified::FlasherBlipSpec::flash()
 {
-  if (! (--countdown)) {
+  if (!(--countdown)) {
     countdown = period;
     if (token == NULL) {
-      token = new ChannelWriteToken
-        (getId(), NameSet(getEntity(), "MyBlip", getPart()),
-         "MyBlip", "flash",
-         Channel::Continuous, Channel::OneOrMoreEntries);
+      token = new ChannelWriteToken(
+        getId(), NameSet(getEntity(), "MyBlip", getPart()), "MyBlip", "flash",
+        Channel::Continuous, Channel::OneOrMoreEntries);
       ChannelEntryInfo ei = token->getChannelEntryInfo();
       cout << "created new token, crid=" << ei.creation_id << endl;
       icount = 1;
@@ -152,8 +146,8 @@ bool WriteUnified::FlasherBlipSpec::flash()
     bool res = token->isValid();
     if (res) {
       ChannelEntryInfo ei = token->getChannelEntryInfo();
-      cout << "flash token valid after " << icount << " checks, entry_id="
-           << ei.entry_id << endl;
+      cout << "flash token valid after " << icount
+           << " checks, entry_id=" << ei.entry_id << endl;
       icount = 0;
     }
     else {
@@ -163,15 +157,9 @@ bool WriteUnified::FlasherBlipSpec::flash()
   return false;
 }
 
-ChannelWriteToken*& WriteUnified::FlasherBlipSpec::getToken()
-{
-  return token;
-}
+ChannelWriteToken *&WriteUnified::FlasherBlipSpec::getToken() { return token; }
 
-MyBlip& WriteUnified::FlasherBlipSpec::getBlip()
-{
-  return b;
-}
+MyBlip &WriteUnified::FlasherBlipSpec::getBlip() { return b; }
 
 void WriteUnified::FlasherBlipSpec::setPeriod(unsigned int period)
 {
@@ -180,17 +168,9 @@ void WriteUnified::FlasherBlipSpec::setPeriod(unsigned int period)
 }
 
 // constructor
-WriteUnified::WriteUnified(Entity* e, const char* part, const
-                       PrioritySpec& ps) :
-  /* The following line initialises the SimulationModule base class.
-     You always pass the pointer to the entity, give the classname and the
-     part arguments.
-     If you give a NULL pointer instead of the inco table, you will not be
-     called for trim condition calculations, which is normal if you for
-     example implement logging or a display.
-     If you give 0 for the snapshot state, you will not be called to
-     fill a snapshot, or to restore your state from a snapshot. Only
-     applicable if you have no state. */
+WriteUnified::WriteUnified(Entity *e, const char *part,
+                           const PrioritySpec &ps) :
+
   SimulationModule(e, classname, part, getMyIncoTable(), 1),
 
   // initialize the data you need in your simulation
@@ -200,6 +180,7 @@ WriteUnified::WriteUnified(Entity* e, const char* part, const
   // initialize the channel access tokens
   // example
   // my_token(getId(), NameSet(getEntity(), "MyData", part)),
+  check_phase(Other),
 
   // activity initialization
   cb1(this, &WriteUnified::doCalculation),
@@ -214,7 +195,7 @@ WriteUnified::WriteUnified(Entity* e, const char* part, const
 
   // connect the triggers for trim calculation. Leave this out if you
   // don not need input for trim calculation
-  //trimCalculationCondition(/* fill in your trim triggering channels */);
+  // trimCalculationCondition(/* fill in your trim triggering channels */);
 }
 
 bool WriteUnified::complete()
@@ -231,10 +212,11 @@ WriteUnified::~WriteUnified()
 }
 
 // as an example, the setTimeSpec function
-bool WriteUnified::setTimeSpec(const TimeSpec& ts)
+bool WriteUnified::setTimeSpec(const TimeSpec &ts)
 {
   // a time span of 0 is not acceptable
-  if (ts.getValiditySpan() == 0) return false;
+  if (ts.getValiditySpan() == 0)
+    return false;
 
   // specify the timespec to the activity
   do_calc.setTimeSpec(ts);
@@ -247,7 +229,7 @@ bool WriteUnified::setTimeSpec(const TimeSpec& ts)
 }
 
 // and the checkTiming function
-bool WriteUnified::checkTiming(const vector<int>& i)
+bool WriteUnified::checkTiming(const vector<int> &i)
 {
   if (i.size() == 3) {
     new TimingCheck(do_calc, i[0], i[1], i[2]);
@@ -261,35 +243,39 @@ bool WriteUnified::checkTiming(const vector<int>& i)
   return true;
 }
 
-bool WriteUnified::addBlip(const vstring& s)
+bool WriteUnified::addBlip(const vstring &s)
 {
+  static bool channel_replay = false;
   if (s.size() > 63) {
     W_MOD(getId() << '/' << classname << " string size blip too long");
     return false;
   }
 
-  MyBlip b; b.identification = s;
-  bliplist.emplace_back(*this, b, false);
+  MyBlip b;
+  b.identification = s;
+  bliplist.emplace_back(*this, b, false, channel_replay);
+  channel_replay = !channel_replay;
   return true;
 }
 
-bool WriteUnified::addEventBlip(const vstring& s)
+bool WriteUnified::addEventBlip(const vstring &s)
 {
   if (s.size() > 63) {
     W_MOD(getId() << '/' << classname << " string size blip too long");
     return false;
   }
 
-  MyBlip b; b.identification = s;
+  MyBlip b;
+  b.identification = s;
   bliplist.emplace_back(*this, b, true);
   return true;
 }
 
-
-bool WriteUnified::placeBlip(const vector<float>& xyuv)
+bool WriteUnified::placeBlip(const vector<float> &xyuv)
 {
   if (xyuv.size() != 2 && xyuv.size() != 4) {
-    E_MOD(getId() << '/' << classname << " enter 2 (pos) or 4 (pos+vel) floats");
+    E_MOD(getId() << '/' << classname
+                  << " enter 2 (pos) or 4 (pos+vel) floats");
     return false;
   }
   if (!bliplist.size()) {
@@ -311,22 +297,24 @@ bool WriteUnified::placeBlip(const vector<float>& xyuv)
   return true;
 }
 
-bool WriteUnified::addFlasherBlip(const vstring& s)
+bool WriteUnified::addFlasherBlip(const vstring &s)
 {
   if (s.size() > 63) {
     W_MOD(getId() << '/' << classname << " string size blip too long");
     return false;
   }
 
-  MyBlip b; b.identification = s;
+  MyBlip b;
+  b.identification = s;
   flasherlist.emplace_back(*this, b);
   return true;
 }
 
-bool WriteUnified::placeFlasherBlip(const vector<float>& xyuv)
+bool WriteUnified::placeFlasherBlip(const vector<float> &xyuv)
 {
   if (xyuv.size() != 3 && xyuv.size() != 5) {
-    E_MOD(getId() << '/' << classname << " enter 3 (pos) or 5 (pos+vel) floats");
+    E_MOD(getId() << '/' << classname
+                  << " enter 3 (pos) or 5 (pos+vel) floats");
     return false;
   }
   if (xyuv[0] < 5.0f) {
@@ -362,7 +350,7 @@ bool WriteUnified::isPrepared()
   // It helps to indicate what the problems are
   bool res = true;
   //  unsigned idx=0;
-  for (auto& b: bliplist) {
+  for (auto &b : bliplist) {
     res = res && b.isValid();
   }
 
@@ -374,7 +362,7 @@ bool WriteUnified::isInitialPrepared()
 {
   // do whatever additional calculations you need to prepare the model.
 
-  cout << "isInitialPrepared "<< endl;
+  cout << "isInitialPrepared " << endl;
   // return result of check
   return true;
 }
@@ -407,8 +395,8 @@ void WriteUnified::finalStopModule(const TimeSpec &time)
 // fill a snapshot with state data. You may remove this method (and the
 // declaration) if you specified to the SimulationModule that the size of
 // state snapshots is zero
-void WriteUnified::fillSnapshot(const TimeSpec& ts,
-                              Snapshot& snap, bool from_trim)
+void WriteUnified::fillSnapshot(const TimeSpec &ts, Snapshot &snap,
+                                bool from_trim)
 {
   // The most efficient way of filling a snapshot is with an AmorphStore
   // object.
@@ -427,14 +415,13 @@ void WriteUnified::fillSnapshot(const TimeSpec& ts,
 // reload from a snapshot. You may remove this method (and the
 // declaration) if you specified to the SimulationModule that the size of
 // state snapshots is zero
-void WriteUnified::loadSnapshot(const TimeSpec& t, const Snapshot& snap)
+void WriteUnified::loadSnapshot(const TimeSpec &t, const Snapshot &snap)
 {
-  rapidjson::GenericDocument<rapidjson::UTF8<> > doc;
+  rapidjson::GenericDocument<rapidjson::UTF8<>> doc;
   rapidjson::ParseResult res = doc.Parse(snap.data.c_str());
 
   auto blpit = bliplist.begin();
-  for (JValue::ConstValueIterator it = doc.Begin();
-       it != doc.End(); ++it) {
+  for (JValue::ConstValueIterator it = doc.Begin(); it != doc.End(); ++it) {
     json_to_dco(*it, blpit->b);
     blpit++;
   }
@@ -444,7 +431,7 @@ void WriteUnified::loadSnapshot(const TimeSpec& t, const Snapshot& snap)
   // simulation is in HoldCurrent or the activity is stopped.
 }
 
-void WriteUnified::doSafe(const TimeSpec& ts)
+void WriteUnified::doSafe(const TimeSpec &ts)
 {
   static bool report = true;
   if (report) {
@@ -462,7 +449,7 @@ void WriteUnified::doSafe(const TimeSpec& ts)
 // this routine contains the main simulation process of your module. You
 // should read the input channels here, and calculate and write the
 // appropriate output
-void WriteUnified::doCalculation(const TimeSpec& ts)
+void WriteUnified::doCalculation(const TimeSpec &ts)
 {
 
   // check the state we are supposed to be in
@@ -470,33 +457,59 @@ void WriteUnified::doCalculation(const TimeSpec& ts)
   case SimulationState::HoldCurrent: {
     // no updates
 
-    break;
-    }
-
-  case SimulationState::Replay: 
-  case SimulationState::Advance: {
-
-    if (getCurrentState() == SimulationState::Advance) {
-      for (BlipList::iterator ii = bliplist.begin();
-           ii != bliplist.end(); ii++) {
-        BlipDrive bd;
-        bd.doRandom();
-        ii->b.dx += bd.rx;
-        ii->b.dy += bd.ry;
-        ii->b.x += ii->b.dx * dt;
-        ii->b.y += ii->b.dy * dt;
-        ii->drive_recorder.record(ts, bd);
+    if (check_phase == InAdvance) {
+      // remember the state of things in advance
+      for (auto &blip : bliplist) {
+        blip.b_check = blip.b;
       }
+      check_phase = Other;
     }
-    else {
-      for (BlipList::iterator ii = bliplist.begin();
-           ii != bliplist.end(); ii++) {
+    if (check_phase == InReplay) {
+      // check and report on differences
+      for (auto &blip : bliplist) {
+        if (blip.b_check != blip.b) {
+          W_MOD("aftr=" << blip.b);
+          W_MOD("prev=" << blip.b_check);
+        }
+      }
+      check_phase = Other;
+    }
+
+  } break;
+
+  case SimulationState::Replay: {
+    // manual replay for half of the blips
+    for (BlipList::iterator ii = bliplist.begin(); ii != bliplist.end(); ii++) {
+      if (!ii->channelreplay) {
+        // manual replay read
         BlipDrive bd;
         ii->drive_recorder.replay(ts, bd);
         ii->b.dx += bd.rx;
         ii->b.dy += bd.ry;
         ii->b.x += ii->b.dx * dt;
         ii->b.y += ii->b.dy * dt;
+      }
+      else {
+        // later instead of the write
+      }
+    }
+    check_phase = InReplay;
+  } break;
+
+  case SimulationState::Advance: {
+
+    for (BlipList::iterator ii = bliplist.begin(); ii != bliplist.end(); ii++) {
+      BlipDrive bd;
+      bd.doRandom();
+      ii->b.dx += bd.rx;
+      ii->b.dy += bd.ry;
+      ii->b.x += ii->b.dx * dt;
+      ii->b.y += ii->b.dy * dt;
+      if (ii->channelreplay) {
+        ii->drive_recorder.record(ts, ii->b);
+      }
+      else {
+        ii->drive_recorder.record(ts, bd);
       }
     }
 
@@ -513,25 +526,28 @@ void WriteUnified::doCalculation(const TimeSpec& ts)
       ii->getBlip().x += ii->getBlip().dx * dt;
       ii->getBlip().y += ii->getBlip().dy * dt;
     }
-
-    break;
-    }
+    check_phase = InAdvance;
+  } break;
   default:
     // other states should never be entered for a SimulationModule,
     // HardwareModules on the other hand have more states. Throw an
     // exception if we get here,
-    throw CannotHandleState(getId(),GlobalId(), "state unhandled");
+    throw CannotHandleState(getId(), GlobalId(), "state unhandled");
   }
 
   // write the data
-  for (BlipList::iterator ii = bliplist.begin();
-       ii != bliplist.end(); ii++) {
-    DataWriter<MyBlip> b((ii->token), ts);
-    b.data() = ii->b;
+  for (BlipList::iterator ii = bliplist.begin(); ii != bliplist.end(); ii++) {
+    if (getCurrentState() == SimulationState::Replay && ii->channelreplay) {
+      ii->drive_recorder.channelReplay(ts, ii->token);
+    }
+    else {
+      DataWriter<MyBlip> b((ii->token), ts);
+      b.data() = ii->b;
+    }
   }
 
-  for (FlasherList::iterator ii = flasherlist.begin();
-       ii != flasherlist.end(); ii++) {
+  for (FlasherList::iterator ii = flasherlist.begin(); ii != flasherlist.end();
+       ii++) {
     if (ii->getToken() != NULL && ii->getToken()->isValid()) {
       DataWriter<MyBlip> b(*(ii->getToken()), ts);
       b.data() = ii->getBlip();
@@ -551,7 +567,7 @@ void WriteUnified::doCalculation(const TimeSpec& ts)
   if (snapshotNow()) {
     smartstring::json_string_writer wrtr(snapdata);
     wrtr.StartArray();
-    for (auto const &blp: bliplist) {
+    for (auto const &blp : bliplist) {
       dco_to_json(wrtr, blp.b);
     }
     wrtr.EndArray();
@@ -564,7 +580,7 @@ void WriteUnified::doCalculation(const TimeSpec& ts)
   }
 }
 
-void WriteUnified::trimCalculation(const TimeSpec& ts, const TrimMode& mode)
+void WriteUnified::trimCalculation(const TimeSpec &ts, const TrimMode &mode)
 {
   // read the event equivalent of the input data
   // example
@@ -578,28 +594,25 @@ void WriteUnified::trimCalculation(const TimeSpec& ts, const TrimMode& mode)
   // these out again into trim variables (see you TrimTable
 
   // trim calculation
-  switch(mode) {
+  switch (mode) {
   case FlightPath: {
     // one type of trim calculation, find a power setting and attitude
     // belonging to a flight path angle and speed
-  }
-  break;
+  } break;
 
   case Speed: {
     // find a flightpath belonging to a speed and power setting (also
     // nice for gliders)
-  }
-  break;
+  } break;
 
   case Ground: {
     // find an altitude/attitude belonging to standing still on the
     // ground, power/speed 0
-  }
-  break;
+  } break;
 
   default:
     W_MOD(getId() << " cannot calculate inco mode " << mode);
-  break;
+    break;
   }
 
   // This works just like a normal calculation, only you provide the
@@ -627,12 +640,13 @@ static TypeCreator<WriteUnified> a(WriteUnified::getMyParameterTable());
 
 // helper methods
 
-WriteUnified::NormalBlipSpec::
-NormalBlipSpec(const WriteUnified& host, const MyBlip& b,
-               bool evtype) :
+WriteUnified::NormalBlipSpec::NormalBlipSpec(const WriteUnified &host,
+                                             const MyBlip &b, bool evtype,
+                                             bool channelreplay) :
   AssociateObject<WriteUnified>(host),
   b(b),
   evtype(evtype),
+  channelreplay(channelreplay),
   token(getId(), NameSet(getEntity(), getclassname<MyBlip>(), getPart()),
         getclassname<MyBlip>(), b.identification.c_str(),
         evtype ? Channel::Events : Channel::Continuous,
@@ -647,11 +661,18 @@ bool WriteUnified::NormalBlipSpec::isValid()
   CHECK_TOKEN(token);
 
   if (res) {
-    //drive_recorder.complete(getEntity(), token);
-    drive_recorder.complete
-      (getEntity(),
-       std::string("WriteUnified:") + std::string(b.identification.c_str()),
-       "BlipDrive");
+    if (channelreplay) {
+      // replay directly into channel
+      drive_recorder.complete(getEntity(), token);
+    }
+    else {
+      // manual replay
+      // drive_recorder.complete(getEntity(), token);
+      drive_recorder.complete(getEntity(),
+                              std::string("WriteUnified:") +
+                                std::string(b.identification.c_str()),
+                              "BlipDrive");
+    }
   }
   CHECK_RECORDER(drive_recorder);
 
@@ -659,6 +680,6 @@ bool WriteUnified::NormalBlipSpec::isValid()
 }
 
 // ensure classname is copied for AssociateObjects.
-template<>
-const char* const AssociateObject<WriteUnified>::classname =
+template <>
+const char *const AssociateObject<WriteUnified>::classname =
   WriteUnified::classname;

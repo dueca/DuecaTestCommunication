@@ -47,8 +47,14 @@ private: // simulation data
     /** initial location/name blip. */
     MyBlip b;
 
+    /** Replay checking location/name blip. */
+    MyBlip b_check;
+
     /** event type or not */
     bool evtype;
+
+    /** replay through channel or manual */
+    bool channelreplay;
 
     /** Pointer to an access token. */
     ChannelWriteToken token;
@@ -58,7 +64,7 @@ private: // simulation data
 
     // constructor
     NormalBlipSpec(const WriteUnified& host, const MyBlip& b,
-                   bool evtype = false);
+                   bool evtype = false, bool channelreplay = false);
 
     // access to the token.
     inline ChannelWriteToken& getToken() {return token;}
@@ -108,8 +114,19 @@ private: // simulation data
     void setPeriod(unsigned int period);
   };
 
+  /** Different checking moments */
+  enum CheckPhase {
+    InAdvance, /**< Running in advance */
+    InReplay,  /**< Running in replay */
+    Other      /**< Any other mode */
+  };
+
+  /** Different checking moments */
+  CheckPhase check_phase;
+  
 private: // trim calculation data
   // declare the trim calculation data needed for your simulation
+
 
 private: // snapshot data, recording of state a a given moment
   dueca::smartstring            snapdata;
