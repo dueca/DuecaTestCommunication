@@ -35,14 +35,14 @@
 
     \verbinclude write-multi-stream.scm
 */
-class WriteUnified: public SimulationModule
+class WriteUnified: public dueca::SimulationModule
 {
 private: // simulation data
   // declare the data you need in your simulation
   double dt;
 
   /** Helper for driving/writing a single channel */
-  struct NormalBlipSpec: public AssociateObject<WriteUnified>
+  struct NormalBlipSpec: public dueca::AssociateObject<WriteUnified>
   {
     /** initial location/name blip. */
     MyBlip b;
@@ -57,17 +57,17 @@ private: // simulation data
     bool channelreplay;
 
     /** Pointer to an access token. */
-    ChannelWriteToken token;
+    dueca::ChannelWriteToken token;
 
     /** Data recorder for advance (random input)/Replay */
-    DataRecorder drive_recorder;
+    dueca::DataRecorder drive_recorder;
 
     // constructor
     NormalBlipSpec(const WriteUnified& host, const MyBlip& b,
                    bool evtype = false, bool channelreplay = false);
 
     // access to the token.
-    inline ChannelWriteToken& getToken() {return token;}
+    inline dueca::ChannelWriteToken& getToken() {return token;}
 
     bool isValid();
 
@@ -79,7 +79,7 @@ private: // simulation data
   };
 
   /** Helper for driving/writing a single, time limited channel */
-  class FlasherBlipSpec: public AssociateObject<WriteUnified>
+  class FlasherBlipSpec: public dueca::AssociateObject<WriteUnified>
   {
     /** initial location/name blip. */
     MyBlip b;
@@ -92,7 +92,7 @@ private: // simulation data
     unsigned int countdown;
 
     /** Pointer to an access token. */
-    ChannelWriteToken* token;
+    dueca::ChannelWriteToken* token;
 
     /** Invalid count, 0 = valid */
     unsigned int icount;
@@ -105,7 +105,7 @@ private: // simulation data
     bool flash();
 
     // access to the token.
-    ChannelWriteToken*& getToken();
+    dueca::ChannelWriteToken*& getToken();
 
     // access to the initial blip
     MyBlip& getBlip();
@@ -123,7 +123,7 @@ private: // simulation data
 
   /** Different checking moments */
   CheckPhase check_phase;
-  
+
 private: // trim calculation data
   // declare the trim calculation data needed for your simulation
 
@@ -132,35 +132,35 @@ private: // snapshot data, recording of state a a given moment
   dueca::smartstring            snapdata;
 
 private: // channel access
-  typedef list<NormalBlipSpec>  BlipList;
+  typedef std::list<NormalBlipSpec>  BlipList;
   BlipList bliplist;
 
-  typedef list<FlasherBlipSpec> FlasherList;
+  typedef std::list<FlasherBlipSpec> FlasherList;
   FlasherList flasherlist;
 
 private: // activity allocation
   /** Callback object for simulation calculation. */
-  Callback<WriteUnified>  cb1, cb2;
+  dueca::Callback<WriteUnified>  cb1, cb2;
 
   /** Activity */
-  ActivityCallback      do_calc;
+  dueca::ActivityCallback      do_calc;
 
   /** Regular clock activation. */
-  PeriodicAlarm         myclock;
+  dueca::PeriodicAlarm         myclock;
 
 public: // class name and trim/parameter tables
   /** Name of the module. */
   static const char* const           classname;
 
   /** Return the initial condition table. */
-  static const IncoTable*            getMyIncoTable();
+  static const dueca::IncoTable*            getMyIncoTable();
 
   /** Return the parameter table. */
-  static const ParameterTable*       getMyParameterTable();
+  static const dueca::ParameterTable*       getMyParameterTable();
 
 public: // construction and further specification
   /** Constructor. Is normally called from scheme/the creation script. */
-  WriteUnified(Entity* e, const char* part, const PrioritySpec& ts);
+  WriteUnified(dueca::Entity* e, const char* part, const dueca::PrioritySpec& ts);
 
   /** Continued construction. This is called after all script
       parameters have been read and filled in, according to the
@@ -180,10 +180,10 @@ public: // construction and further specification
   // Delete if not needed!
 
   /** Specify a time specification for the simulation activity. */
-  bool setTimeSpec(const TimeSpec& ts);
+  bool setTimeSpec(const dueca::TimeSpec& ts);
 
   /** Request check on the timing. */
-  bool checkTiming(const vector<int>& i);
+  bool checkTiming(const std::vector<int>& i);
 
   /** Add an object to the stream. */
   bool addBlip(const vstring& s);
@@ -192,13 +192,13 @@ public: // construction and further specification
   bool addEventBlip(const vstring& s);
 
   /** Put the last object added in its place. */
-  bool placeBlip(const vector<float>& xyuv);
+  bool placeBlip(const std::vector<float>& xyuv);
 
   /** Add an object to the stream. */
   bool addFlasherBlip(const vstring& s);
 
   /** Put the last object added in its place. */
-  bool placeFlasherBlip(const vector<float>& xyuv);
+  bool placeFlasherBlip(const std::vector<float>& xyuv);
 
 public: // member functions for cooperation with DUECA
   /** indicate that everything is ready. */
@@ -208,40 +208,40 @@ public: // member functions for cooperation with DUECA
   bool isInitialPrepared();
 
   /** start responsiveness to input data. */
-  void startModule(const TimeSpec &time);
+  void startModule(const dueca::TimeSpec &time);
 
   /** stop responsiveness to input data. */
-  void stopModule(const TimeSpec &time);
+  void stopModule(const dueca::TimeSpec &time);
 
   /** start responsiveness to input data. */
-  void initialStartModule(const TimeSpec &time);
+  void initialStartModule(const dueca::TimeSpec &time);
 
   /** stop responsiveness to input data. */
-  void finalStopModule(const TimeSpec &time);
+  void finalStopModule(const dueca::TimeSpec &time);
 
 public: // the member functions that are called for activities
   /** Method that does safe work */
-  void doSafe(const TimeSpec& ts);
+  void doSafe(const dueca::TimeSpec& ts);
 
   /** the method that implements the main calculation. */
-  void doCalculation(const TimeSpec& ts);
+  void doCalculation(const dueca::TimeSpec& ts);
 
 public: // member functions for cooperation with DUSIME
   /** For the Snapshot capability, fill the snapshot "snap" with the
       data saved at a point in your simulation (if from_trim is false)
       or with the state data calculated in the trim calculation (if
       from_trim is true). */
-  void fillSnapshot(const TimeSpec& ts,
-                    Snapshot& snap, bool from_trim);
+  void fillSnapshot(const dueca::TimeSpec& ts,
+                    dueca::Snapshot& snap, bool from_trim);
 
   /** Restoring the state of the simulation from a snapshot. */
-  void loadSnapshot(const TimeSpec& t, const Snapshot& snap);
+  void loadSnapshot(const dueca::TimeSpec& t, const dueca::Snapshot& snap);
 
   /** Perform a trim calculation. Should NOT use current state
       uses event channels parallel to the stream data channels,
       calculates, based on the event channel input, the steady state
       output. */
-  void trimCalculation(const TimeSpec& ts, const TrimMode& mode);
+  void trimCalculation(const dueca::TimeSpec& ts, const dueca::TrimMode& mode);
 };
 
 #endif
