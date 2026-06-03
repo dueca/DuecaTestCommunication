@@ -32,6 +32,7 @@
 // the standard package for DUSIME, including template source
 #define DO_INSTANTIATE
 #include <dusime.h>
+using namespace std;
 
 // class/module name
 const char* const ReadUnified::classname = "read-unified";
