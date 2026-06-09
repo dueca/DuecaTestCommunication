@@ -32,6 +32,7 @@
 #define DO_INSTANTIATE
 #include <dusime.h>
 using namespace std;
+using namespace dueca;
 
 // class/module name
 const char *const WriteUnified::classname = "write-unified";
