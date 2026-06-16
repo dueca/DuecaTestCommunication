@@ -1,0 +1,10 @@
+;; Scores DCO
+
+
+(Type int)
+
+
+(Object Scores 
+                ;; Score
+                (int score)
+)

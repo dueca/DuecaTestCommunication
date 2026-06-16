@@ -23,5 +23,6 @@
     <module>readwrite-server</module>
     <module>ws-write-read</module>
     <module>inter-monitor</module>
+    <module>distritest</module>
   </project>
 </machine>

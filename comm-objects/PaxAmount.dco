@@ -1,0 +1,8 @@
+;; PaxAmount DCO
+
+(Type int) 
+
+(Object PaxAmount
+		;; Pax Amount
+		(int pax)
+)
