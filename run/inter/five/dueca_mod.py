@@ -54,7 +54,7 @@ log_timing = dueca.TimeSpec(0, 400)
 
 ## the name for the main entity to create. Note that you can create as
 ## many entities as you want, usually one is enough. Adjust as appropriate
-entity_name = "five"
+entity_name = "one"
 
 ## ---------------------------------------------------------------------
 ### the modules needed for dueca itself
@@ -104,7 +104,7 @@ if this_node_id == ecs_node:
     mymods.append(dueca.Module(
         'write-unified', '', sim_priority).param(
             set_timing=sim_timing,
-            add_blip=entity_name,
+            add_blip=entity_name+'+five',
             place_blip=[0, 0, 0.1, 0.1]
         )
     )

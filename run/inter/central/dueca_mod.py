@@ -118,10 +118,15 @@ if this_node_id == ecs_node:
         'inter-monitor', '', sim_priority
     ))
 
+    mymods.append(dueca.Module(
+        'distri-test', '', sim_priority
+    ))
+
     # placeholder when no modules are defined, remove if desired
     mymods.append(dueca.Module(
         'channel-replicator-master', "", comm_prio).param(
             watch_channels=(
+                "Scores://world", "PaxAmount://world",
                 "MyBlip://world", "MyBlip://one", "MyBlib://two",
                 "MyBlip://three", "MyBlip://four"),
             message_size=2048,

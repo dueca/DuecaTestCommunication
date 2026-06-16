@@ -92,6 +92,21 @@ blp = dueca.MyBlip().param(identification="ident",
                            dy=1.3,
                            mode="On").complete()
 
+# had troubles in another project with creating two of these, check
+# for regression
+dum1 = dueca.Cw08ParameterSet().param(
+    id = 1,
+    tilt_coordination_method = 2
+)
+dum2 = dueca.Cw08ParameterSet().param(
+    id = 2,
+    tilt_coordination_method = 1
+)
+
+# can these be safely deleted too?
+del dum1
+del dum2
+
 if this_node_id == ecs_node:
     mymods.append(
         dueca.Module(
@@ -152,7 +167,7 @@ if this_node_id == ecs_node:
             ('log-entry', ("TestMappedFixVector://PHLAB",
                            "TestMappedFixVector", "/entry/mappedfixvector")),
         ))
-    
+
     mymods.append(
         dueca.Module("ddff-logger", "", log_priority).param(
             ('set_timing', log_timing),
