@@ -15,3 +15,5 @@ if [ $RUNSCRIPT = "1" ]; then
 fi
 
 # clean the user's stuff (that's you, you have to add your commands here!)
+rm -rf datalog-*.hdf5 initials-world-*.toml recordings-world-*.ddff \
+    __pycache__ runlogs

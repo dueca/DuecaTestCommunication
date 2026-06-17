@@ -16,8 +16,8 @@ if [ ! -d runlogs ]; then
    mkdir runlogs
 fi
 
-# link the executable
-ln -sf ../../../build/dueca_run.x .
+# copy executable, it will be changed later
+cp -f ../../../build/dueca_run.x .
 
 # create a run script, if desired set to 1
 RUNSCRIPT=1

@@ -8,16 +8,13 @@ DATADIR=$(realpath ../../run-data)
 # python helper script
 ln -sf $DATADIR/which_dueca_gtk.py .
 
-# example for project-wide configuration (.cnf) files
-# ln -sf $DATADIR/*.cnf .
-
 # create a folder for run log history
 if [ ! -d runlogs ]; then
    mkdir runlogs
 fi
 
-# link the executable
-ln -sf ../../../build/dueca_run.x .
+# copy executable, it will be changed later
+cp -f ../../../build/dueca_run.x .
 
 # create a run script, if desired set to 1
 RUNSCRIPT=1
@@ -36,7 +33,7 @@ EOF
 fi
 
 # copy a gui file for DUECA
-sed -e 's@DUECA/DUSIME@TEAM 2@' `dueca-config --path-datafiles`/dusime.glade3 \
+sed -e 's@DUECA/DUSIME@TEAM 1@' `dueca-config --path-datafiles`/dusime.glade3 \
     >dusime.ui
 
 # active only on node 0, when a start file is found, link the start

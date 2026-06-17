@@ -1,8 +1,8 @@
 ;; PaxAmount DCO
 
-(Type int) 
+(Type int32_t "#include <inttypes.h>")
 
 (Object PaxAmount
 		;; Pax Amount
-		(int pax)
+		(int32_t pax)
 )
