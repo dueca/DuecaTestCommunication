@@ -15,3 +15,5 @@ if [ $RUNSCRIPT = "1" ]; then
 fi
 
 # clean the user's stuff (that's you, you have to add your commands here!)
+rm -rf initials-*-*.toml recordings-*-*.ddff \
+    __pycache__ runlogs dusime.ui

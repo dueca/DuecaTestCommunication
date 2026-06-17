@@ -1,10 +1,10 @@
 ;; Scores DCO
 
 
-(Type int)
+(Type int32_t "#include <inttypes.h>")
 
 
-(Object Scores 
+(Object Scores
                 ;; Score
-                (int score)
+                (int32_t score)
 )

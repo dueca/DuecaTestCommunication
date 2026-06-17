@@ -13,12 +13,8 @@ if [ ! -d runlogs ]; then
    mkdir runlogs
 fi
 
-# convenience link to executable (cmake or legacy)
-if [ -d ../../../build ]; then
-   ln -sf ../../../build/dueca_run.x .
-else
-   ln -sf ../../../dueca_run.x .
-fi
+# link the executable
+ln -sf ../../../build/dueca_run.x .
 
 # create a run script, if desired set to 1
 RUNSCRIPT=1
