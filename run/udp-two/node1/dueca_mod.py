@@ -148,4 +148,3 @@ filer = dueca.ReplayFiler("PHLAB")
 # then combine in an entity (one "copy" per node)
 if mymods:
     myentity = dueca.Entity("PHLAB", mymods)
-

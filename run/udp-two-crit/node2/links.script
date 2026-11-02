@@ -1,0 +1,46 @@
+# -*-sh-*-
+# this file creates all links to files in the data directory needed for
+# running the application on a specific machine.
+
+# standard folder with project-wide data
+DATADIR=$(realpath ../../run-data)
+
+# python helper script
+ln -sf $DATADIR/which_dueca_gtk.py .
+
+# create a folder for run log history
+test -d runlogs || mkdir runlogs
+
+# convenience link to executable
+test -d ../../../build && ln -sf ../../../build/dueca_run.x .
+
+# --- create a runscript ---
+# list files you want kept with the run results, e.g. logs
+MOVEFILES=""
+# files you want copied/archived with the run results, e.g. config file
+COPYFILES="dueca_mod.py"
+
+# create a run script. Adapt if needed for your use case
+if [ \! -x runscript ]; then
+    cat >runscript <<EOF
+#!/usr/bin/bash
+#
+# Automatically generated from the links.script file
+#
+
+# Gather all files from previous run, and move to new folder under
+# runlogs
+dueca-archivelogfiles "$MOVEFILES" "$COPYFILES"
+
+# start DUECA executable.
+../../../build/dueca_run.x  > >(tee normal.log) 2> >(tee error.log >&2)
+EOF
+    chmod +x runscript
+fi
+
+# active only on node 0, when a start file is found, link the start
+# file to a start script folder (default ${HOME}/scripts)
+dueca-startlink --scriptdir=${HOME}/scripts
+
+# add your instructions, configuration/data folders, symbolic links
+# to needed files, etc.
