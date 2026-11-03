@@ -47,6 +47,9 @@ private: // simulation data
   /** Run time before flagging the critical error. */
   double runtime;
 
+  /** Breakup time */
+  double breaktime;
+
 public:
   /** Some logic */
   enum ExpectedStates {
@@ -82,10 +85,13 @@ private:
   dueca::PeriodicAlarm myclock;
 
   /** Callback object for simulation calculation. */
-  dueca::Callback<InitiateCritical> cb1, cb2;
+  dueca::Callback<InitiateCritical> cb1, cb2, cb3;
 
   /** Activity for simulation calculation. */
   dueca::CriticalActivity do_calc;
+
+  /** Activity for breakup initiation (simulate ctrl-c) */
+  dueca::ActivityCallback do_breakup;
 
 public: // class name and trim/parameter tables
   /** Name of the module. */
@@ -150,6 +156,9 @@ public: // the member functions that are called for activities
 
   /** the method that implements the safety strategy. */
   void doSafeWork(const dueca::TimeSpec &ts);
+
+  /** node breakup initiation */
+  void doBreakup(const dueca::TimeSpec& ts);
 };
 
 std::ostream &operator<<(std::ostream &os,

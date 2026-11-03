@@ -33,12 +33,7 @@ if [ \! -x runscript ]; then
 dueca-archivelogfiles "$MOVEFILES" "$COPYFILES"
 
 # start DUECA executable.
-../../../build/dueca_run.x  > >(tee normal.log) 2> >(tee error.log >&2) &
-DUECAPID=\$!
-echo "DUECA process pid \${DUECAPID}" > process.log
-sleep 70
-kill -SIGINT \${DUECAPID}
-grep "Critical error" error.log
+../../../build/dueca_run.x  > >(tee normal.log) 2> >(tee error.log >&2)
 EOF
     chmod +x runscript
 fi

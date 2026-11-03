@@ -14,6 +14,7 @@
 #include "InitiateCritical.hxx"
 
 // include additional files needed for your calculation here
+#include <dueca/NodeManager.hxx>
 
 // the standard package for DUSIME, including template source
 #define DO_INSTANTIATE
@@ -46,6 +47,9 @@ const ParameterTable *InitiateCritical::getMyParameterTable()
     { "runtime", new VarProbe<_ThisModule_, double>(&_ThisModule_::runtime),
       "Runtime [s], before flagging critical error" },
 
+    { "breaktime", new VarProbe<_ThisModule_, double>(&_ThisModule_::breaktime),
+      "Break-up time [s]" },
+
     { "nodewide", new VarProbe<_ThisModule_, bool>(&_ThisModule_::nodewide),
       "Flag the error as nodewide" },
 
@@ -63,6 +67,7 @@ InitiateCritical::InitiateCritical(Entity *e, const char *part,
   // initialize the data you need in your simulation
   hardware_ok(false),
   runtime(3600.0),
+  breaktime(3600.0),
   nodewide(false),
   estates(InitialSafe),
   // initialize the data you need for the trim calculation
@@ -71,12 +76,15 @@ InitiateCritical::InitiateCritical(Entity *e, const char *part,
   myclock(),
   cb1(this, &_ThisModule_::doCalculation),
   cb2(this, &_ThisModule_::doSafeWork),
-  do_calc(this, "flag nodewide error", &cb1, &cb2, ps)
+  cb3(this, &_ThisModule_::doBreakup),
+  do_calc(this, "flag nodewide error", &cb1, &cb2, ps),
+  do_breakup(getId(), "break-up simulation", &cb3, ps)
 {
   // do the actions you need for the simulation
 
   // connect the triggers for simulation
   do_calc.setTrigger(myclock);
+  do_breakup.setTrigger(myclock);
 }
 
 bool InitiateCritical::complete()
@@ -154,6 +162,7 @@ void InitiateCritical::initialStartModule(const TimeSpec &time)
 void InitiateCritical::startModule(const TimeSpec &time)
 {
   do_calc.switchWork(time);
+  do_breakup.switchOn(time);
 }
 
 // stop the module work
@@ -168,6 +177,7 @@ void InitiateCritical::stopModule(const TimeSpec &time)
 void InitiateCritical::finalStopModule(const TimeSpec &time)
 {
   do_calc.switchOff(time);
+  do_breakup.switchOff(time);
 }
 
 // this routine contains the main simulation process of your module. You
@@ -304,20 +314,22 @@ void InitiateCritical::doSafeWork(const TimeSpec &ts)
   }
 }
 
-std::ostream &operator<<(std::ostream &os, const InitiateCritical::ExpectedStates &es)
+void InitiateCritical::doBreakup(const TimeSpec &ts)
 {
-  const char *names[] = { "InitialSafe",
-                          "WaitToGiveOK1",
-                          "WaitToGiveOK2",
-                          "WaitToGiveOK3",
-                          "GivenOk",
-                          "Inactive",
-                          "HoldCurrent",
-                          "Calibrate",
-                          "Calibrated",
-                          "Advance",
-                          "ErrorTriggered",
-                          "BackInSafe",
+  breaktime -= ts.getDtInSeconds();
+  if (breaktime <= 0.0) {
+    NodeManager::single()->breakUp();
+    breaktime = 10000000.0;
+  }
+}
+
+std::ostream &operator<<(std::ostream &os,
+                         const InitiateCritical::ExpectedStates &es)
+{
+  const char *names[] = { "InitialSafe",   "WaitToGiveOK1",  "WaitToGiveOK2",
+                          "WaitToGiveOK3", "GivenOk",        "Inactive",
+                          "HoldCurrent",   "Calibrate",      "Calibrated",
+                          "Advance",       "ErrorTriggered", "BackInSafe",
                           "UnDefined" };
   return os << names[std::min(unsigned(es),
                               unsigned(InitiateCritical::Undefined))];

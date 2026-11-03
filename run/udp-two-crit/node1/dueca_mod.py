@@ -101,56 +101,57 @@ blp = dueca.MyBlip().param(identification = "ident",
                            dy = 1.3,
                            mode = "On").complete()
 
-if this_node_id == ecs_node:
-    mymods.append(
-        dueca.Module(
-            "write-unified", "1", admin_priority).param(
+# if this_node_id == ecs_node:
+#     mymods.append(
+#         dueca.Module(
+#             "write-unified", "1", admin_priority).param(
 
-                set_timing = sim_timing,
-                check_timing = (10000, 20000),
+#                 set_timing = sim_timing,
+#                 check_timing = (10000, 20000),
 
-                add_blip = "first blip 1",
-                place_blip = [ 20.0, 20.0, -0.1, -0.1, ]).param(
+#                 add_blip = "first blip 1",
+#                 place_blip = [ 20.0, 20.0, -0.1, -0.1, ]).param(
 
-                add_blip = "second blip 1",
-                place_blip = [ 2, 2 ]).param(
+#                 add_blip = "second blip 1",
+#                 place_blip = [ 2, 2 ]).param(
 
-                add_flasher_blip = "flashing 1",
-                place_flasher_blip = [ 200, 0.4, 4.0 ]))
+#                 add_flasher_blip = "flashing 1",
+#                 place_flasher_blip = [ 200, 0.4, 4.0 ]))
 
-    mymods.append(
-        dueca.Module(
-            "read-unified", "2", sim_priority).param(
-                set_timing = sim_timing,
-                check_timing = (10000, 20000)
-            ))
+#     mymods.append(
+#         dueca.Module(
+#             "read-unified", "2", sim_priority).param(
+#                 set_timing = sim_timing,
+#                 check_timing = (10000, 20000)
+#             ))
 
 if this_node_id == 1:
-    mymods.append(
-        dueca.Module(
-            "write-unified", "2", admin_priority).param(
+    # mymods.append(
+    #     dueca.Module(
+    #         "write-unified", "2", admin_priority).param(
 
-                set_timing = sim_timing,
-                check_timing = (10000, 20000),
+    #             set_timing = sim_timing,
+    #             check_timing = (10000, 20000),
 
-                add_blip = "first blip 2",
-                place_blip = [ 20.0, 20.0, -0.1, -0.1, ]).param(
+    #             add_blip = "first blip 2",
+    #             place_blip = [ 20.0, 20.0, -0.1, -0.1, ]).param(
 
-                add_blip = "second blip 2",
-                place_blip = [ 2, 2 ]).param(
+    #             add_blip = "second blip 2",
+    #             place_blip = [ 2, 2 ]).param(
 
-                add_flasher_blip = "flashing 2",
-                place_flasher_blip = [ 220, 0.4, 4.0 ]))
+    #             add_flasher_blip = "flashing 2",
+    #             place_flasher_blip = [ 220, 0.4, 4.0 ]))
 
-    mymods.append(
-        dueca.Module(
-            "read-unified", "1", sim_priority).param(
-                set_timing = sim_timing,
-                check_timing = (10000, 20000)
-            ))
+    # mymods.append(
+    #     dueca.Module(
+    #         "read-unified", "1", sim_priority).param(
+    #             set_timing = sim_timing,
+    #             check_timing = (10000, 20000)
+    #         ))
     mymods.append(
         dueca.Module("initiate-critical", "", sim_priority).param(
             runtime = 5.0,
+            breaktime = 20.0,
             nodewide = True
         )
     )
