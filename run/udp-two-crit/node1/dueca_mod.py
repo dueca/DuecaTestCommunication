@@ -151,7 +151,7 @@ if this_node_id == 1:
     mymods.append(
         dueca.Module("initiate-critical", "", sim_priority).param(
             runtime = 5.0,
-            breaktime = 20.0,
+            breaktime = 40.0,
             nodewide = True
         )
     )
