@@ -128,36 +128,7 @@ DUECA_ticker = dueca.Ticker().param(
 
 ###  6 _ communication hardware accessors. These may use the ticker
 ###      or channels to trigger activity.
-
-if use_ip_comm and classic_ip:
-
-    # classic IP communication
-    DUECA_netcomm = dueca.IPMulticastAccessor().param(
-        packer = DUECA_packer,
-        unpacker = DUECA_unpacker,
-        fill_packer = DUECA_fillpacker,
-        fill_unpacker = DUECA_fillunpacker,
-        output_buffer_size = packet_size,
-        no_output_buffers = 5,
-        input_buffer_size = packet_size,
-        no_input_buffers = 50,
-        mc_address = mc_address,
-        port = mc_port,
-        if_address = if_address,
-        timeout = 50000,
-        n_senders = no_of_nodes,
-        send_order = send_order,
-        time_spec = dueca.TimeSpec(0, communication_interval),
-        priority = dueca.PrioritySpec(comm_prio_level, 0),
-        delay_estimator = dueca.TransportDelayEstimator().param(
-            const_delay = 50.1,
-            delay_per_byte = 1.1,
-            s_v = 20.1,
-            s_const_delay = 10.1,
-            s_delay_per_byte = 0.1,
-            innov_max = 100.1).complete()).complete()
-
-elif use_ip_comm and send_order == 0:
+if use_ip_comm and send_order == 0:
 
     # new UDP communication, for the send master
 

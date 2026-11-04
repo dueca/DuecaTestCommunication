@@ -25,5 +25,6 @@
     <module>inter-monitor</module>
     <module>distritest</module>
     <module>call-python</module>
+    <module>initiate-critical</module>
   </project>
 </machine>

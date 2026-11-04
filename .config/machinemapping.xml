@@ -11,4 +11,6 @@
   <node name="three" machineclass="solo" sparse-checkout="true"/>
   <node name="four" machineclass="solo" sparse-checkout="true"/>
   <node name="five" machineclass="solo" sparse-checkout="true"/>
+  <node name="node1" machineclass="solo" sparse-checkout="true"/>
+  <node name="node2" machineclass="solo" sparse-checkout="true"/>
 </nodes>
